@@ -1,0 +1,11 @@
+tunnel: ${TUNNEL_ID}
+credentials-file: /etc/cloudflared/${TUNNEL_ID}.json
+
+ingress:
+  - hostname: gps-map.online
+    service: http://gps-web:3000
+  - hostname: api.gps-map.online
+    service: http://gps-web:3000
+  - hostname: geo.gps-map.online
+    service: http://map_server:8080
+  - service: http_status:404

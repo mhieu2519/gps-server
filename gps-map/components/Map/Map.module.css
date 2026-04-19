@@ -1,0 +1,305 @@
+/* components/Map/Map.module.css */
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+.sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 330px;
+    height: 100%;
+    z-index: 1000;
+    background: white;
+    transition: transform 0.3s ease-in-out;
+    /* Hiệu ứng trượt mượt mà */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebarHeader {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+/* Khi sidebar bị ẩn */
+.sidebarHidden {
+    transform: translateX(-100%);
+    position: absolute;
+    /* Để bản đồ tràn ra toàn màn hình */
+}
+
+.closeSidebarBtn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+    z-index: 1001;
+}
+
+.closeSidebarBtn:hover {
+    color: #ff4d4f;
+}
+
+.openSidebarBtn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 999;
+    padding: 10px 15px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/*Chọn ngày xem*/
+.filterContainer {
+    padding: 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filterContainer label {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #555;
+}
+
+.dateInput {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+}
+
+.dateInput:focus {
+    border-color: #00e5ff;
+    box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.1);
+}
+
+
+
+.mapWrapper {
+    flex: 1;
+    position: relative;
+    transition: margin-left 0.3s ease;
+}
+
+
+.deviceList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.deviceItem {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.deviceItem:hover {
+    background: #f0f7ff;
+}
+
+.deviceName {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.mapWrapper {
+    flex: 1;
+    position: relative;
+}
+
+
+.trainComposition {
+    display: flex;
+    flex-direction: row-reverse;
+    /* Để đầu tàu nằm bên phải, các toa nối đuôi sang trái */
+    align-items: flex-end;
+    gap: 4px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 10px;
+    overflow-x: auto;
+}
+
+.wagon {
+    width: 35px;
+    height: 22px;
+    background-color: #87ceeb;
+    border: 1px solid #5fa9c7;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.wagonVip {
+    background-color: #f9fd05 !important;
+    border-color: #f9fd05 !important;
+}
+
+.locomotive {
+    width: 45px;
+    height: 28px;
+    background-color: #0076ba;
+    border-radius: 4px 12px 4px 4px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Hiệu ứng khi nhấn vào toa */
+.wagonActive {
+    border: 2px solid #18b4e4 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.wagonDetailBox {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    animation: fadeIn 0.3s ease;
+}
+
+.wagonDetailHeader {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    font-size: 14px;
+}
+
+.wagonDetailHeader button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #999;
+}
+
+.wagonDetailGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    font-size: 12px;
+}
+
+/* Progress bar tải trọng */
+.loadBarBg {
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.loadBarFill {
+    height: 100%;
+    background: #52c41a;
+    /* Màu xanh lá */
+    transition: width 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Thanh chứa các nút Tab */
+.tabHeaders {
+    display: flex;
+    background: #e7de8a;
+    /* border-bottom: 1px solid #312d2d;*/
+}
+
+.tabBtn {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    color: #5f634c;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+}
+
+.tabActive {
+    color: #d83503;
+    /* background: rgba(241, 239, 212, 0.05); */
+    border-bottom: 3px solid #d83503;
+}
+
+/* Tối ưu danh sách lịch sử */
+.sessionItem {
+    padding: 12px;
+    /*border-bottom: 1px solid #222;*/
+    cursor: pointer;
+}
+
+.sessionItem:hover {
+    background: #f8f9fa;
+}
+
+.sessionMain {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.sessionTime {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.sessionPoints {
+    font-size: 0.7rem;
+    background: #bef3f5;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.emptyText {
+    text-align: center;
+    color: #555;
+    margin-top: 20px;
+    font-style: italic;
+}

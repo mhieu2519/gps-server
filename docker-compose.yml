@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # 1. Database PostGIS
+  map_db:
+    image: postgis/postgis:15-3.3
+    container_name: map_db
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  # 2. GeoServer (Dữ liệu bản đồ)
+  map_server:
+    image: oscarfonts/geoserver:latest
+    container_name: map_server
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - map_db
+
+  # 3. Web Next.js (Giao diện đồ án)
+  gps-web:
+    build: ./gps-map
+    container_name: gps-web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@map_db:5432/${POSTGRES_DB}
+    depends_on:
+      - map_db
+
+  # 4. Cloudflare Tunnel (Cửa ngõ ra Internet)
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-tunnel
+    restart: always
+    command: tunnel --config /etc/cloudflared/config.yml run
+    environment:
+      - TUNNEL_ID=${TUNNEL_ID}
+    volumes:
+      - ./cloudflared:/etc/cloudflared
+    depends_on:
+      - gps-web
+      - map_server
