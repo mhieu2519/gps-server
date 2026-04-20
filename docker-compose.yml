@@ -6,6 +6,8 @@ services:
     image: postgis/postgis:15-3.3
     container_name: map_db
     restart: always
+    ports:
+      - "0.0.0.0:5432:5432"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
