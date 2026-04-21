@@ -28,7 +28,7 @@ services:
     depends_on:
       - map_db
 
-  # 3. Web Next.js (Giao diện đồ án)
+  # 3. Web Next.js (Giao diện)
   gps-web:
     build: ./gps-map
     container_name: gps-web
@@ -40,7 +40,7 @@ services:
     depends_on:
       - map_db
 
-  # 4. Cloudflare Tunnel (Cửa ngõ ra Internet)
+  # 4. Cloudflare Tunnel (Cửa ra Internet)
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared-tunnel
