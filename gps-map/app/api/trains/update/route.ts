@@ -7,9 +7,10 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     max: 20,
 
-    ssl: {
-        rejectUnauthorized: false // Cho phép kết nối nếu dùng chứng chỉ tự ký hoặc IP
-    }
+    ssl: false
+    // {
+    //    rejectUnauthorized: false // Cho phép kết nối nếu dùng chứng chỉ tự ký hoặc IP
+    //  }
 });
 
 export async function POST(request: Request) {

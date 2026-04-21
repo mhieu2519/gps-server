@@ -11,6 +11,12 @@ import "leaflet-rotatedmarker";
 import { DeviceStatus, HistoryData } from "./types";
 import styles from "./Map.module.css";
 
+import { GestureHandling } from 'leaflet-gesture-handling';
+import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
+
+// Đăng ký plugin Leaflet
+L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling);
+
 // Fix icon Leaflet mặc định
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -253,7 +259,16 @@ export default function MapDashboard() {
 
             {/* Map Area */}
             <div className={styles.mapWrapper}>
-                <MapContainer zoomControl={false} center={[21.0285, 105.8542]} zoom={13} style={{ height: "100%", width: "100%" }}>
+                <MapContainer
+                    {...({
+                        zoomControl: false,
+                        center: [21.0285, 105.8542],
+                        zoom: 13,
+                        style: { height: "100%", width: "100%" },
+                        gestureHandling: true,
+                        scrollWheelZoom: true
+                    } as any)}
+                >
                     {/* 2. Thêm nút điều khiển zoom */}
                     {/* Các vị trí "topleft", "topright", "bottomleft", "bottomright" */}
                     <ZoomControl position="bottomright" />
