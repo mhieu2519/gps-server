@@ -215,7 +215,8 @@ export default function MapDashboard() {
 
                     {activeTab === 'history' && (
                         <div className={styles.sidebarSection}>
-                            <h3 className={styles.sectionTitle}> 👁️ Danh sách chuyến đi</h3>
+                            <h3 className={styles.sectionTitle}>
+                                🚞 Danh sách chuyến đi</h3>
                             <div className={styles.filterContainer}>
                                 {/*<label>Chọn ngày xem:</label>*/}
                                 <input
@@ -269,7 +270,7 @@ export default function MapDashboard() {
                         scrollWheelZoom: true
                     } as any)}
                 >
-                    {/* 2. Thêm nút điều khiển zoom */}
+                    {/* 2. Nút điều khiển zoom */}
                     {/* Các vị trí "topleft", "topright", "bottomleft", "bottomright" */}
                     <ZoomControl position="bottomright" />
 
@@ -288,10 +289,11 @@ export default function MapDashboard() {
                         <LayersControl.Overlay checked name="GeoServer Railway Stations">
                             <WMSTileLayer
                                 url={process.env.NEXT_PUBLIC_GEOSERVER_URL || " "}
-                                layers="du_an_duong_sat:tram_ga"
+                                layers="du_an_duong_sat:ga,du_an_duong_sat:duong_ray"
                                 format="image/png"
                                 transparent={true}
                                 version="1.1.1"
+                                zIndex={1000}
                             />
                         </LayersControl.Overlay>
 
