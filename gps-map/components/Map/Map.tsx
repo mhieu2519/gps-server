@@ -264,7 +264,7 @@ export default function MapDashboard() {
                     {...({
                         zoomControl: false,
                         center: [21.0285, 105.8542],
-                        zoom: 13,
+                        zoom: 15,
                         style: { height: "100%", width: "100%" },
                         gestureHandling: true,
                         scrollWheelZoom: true
@@ -288,12 +288,11 @@ export default function MapDashboard() {
 
                         <LayersControl.Overlay checked name="GeoServer Railway Stations">
                             <WMSTileLayer
-                                url={process.env.NEXT_PUBLIC_GEOSERVER_URL || " "}
+                                url={process.env.NEXT_PUBLIC_GEOSERVER_URL || "https://geo.gps-map.online/geoserver/wms"}
                                 layers="du_an_duong_sat:ga,du_an_duong_sat:duong_ray"
                                 format="image/png"
                                 transparent={true}
                                 version="1.1.1"
-                                zIndex={1000}
                             />
                         </LayersControl.Overlay>
 
