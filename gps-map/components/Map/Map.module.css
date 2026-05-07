@@ -303,3 +303,21 @@
     margin-top: 20px;
     font-style: italic;
 }
+
+/* Style cho nhãn mã tàu */
+.trainLabel {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-weight: bold;
+    font-size: 12px;
+    color: #d32f2f;
+    /* Màu đỏ hoặc màu bạn thích */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Xóa mũi tên nhọn mặc định của Tooltip nếu muốn */
+.trainLabel::before {
+    display: none;
+}

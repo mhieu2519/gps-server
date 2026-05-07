@@ -2,7 +2,7 @@
 
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, WMSTileLayer, LayerGroup, LayersControl, ZoomControl } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, WMSTileLayer, LayerGroup, LayersControl, ZoomControl, Tooltip } from "react-leaflet";
 import { useEffect, useState, useCallback, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -275,10 +275,12 @@ export default function MapDashboard() {
                     <ZoomControl position="bottomright" />
 
                     <LayersControl position="topright">
-
-                        <LayersControl.BaseLayer checked name="Bản đồ đường bộ">
+                        {/*   <LayersControl.BaseLayer checked name="Bản đồ đường bộ">
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        </LayersControl.BaseLayer>
+                        </LayersControl.BaseLayer> */}
+                        <LayersControl.Overlay checked name="Bản đồ OSM">
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        </LayersControl.Overlay>
                         <LayersControl.Overlay checked name="Mạng lưới đường sắt (OpenRail)">
                             <TileLayer
                                 url="https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
@@ -288,7 +290,7 @@ export default function MapDashboard() {
 
                         <LayersControl.Overlay checked name="GeoServer Railway Stations">
                             <WMSTileLayer
-                                url={process.env.NEXT_PUBLIC_GEOSERVER_URL || "https://geo.gps-map.online/geoserver/wms"}
+                                url={process.env.NEXT_PUBLIC_GEOSERVER_URL || " "}
                                 layers="du_an_duong_sat:ga,du_an_duong_sat:duong_ray"
                                 format="image/png"
                                 transparent={true}
@@ -335,9 +337,18 @@ export default function MapDashboard() {
                                         key={id}
                                         position={[devices[id].lat, devices[id].lng]}
                                         icon={trainIcon}
+
                                         rotationAngle={devices[id].heading}
                                         rotationOrigin="center"
                                     >
+                                        <Tooltip
+                                            permanent
+                                            direction="right"
+                                            offset={[10, 0]}
+                                            className={styles.trainLabel}
+                                        >
+                                            {id}
+                                        </Tooltip>
                                         <Popup minWidth={320} eventHandlers={{
                                             remove: () => setSelectedWagon(null)
                                         }}>
