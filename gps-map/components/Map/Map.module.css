@@ -18,6 +18,27 @@
     transition: transform 0.3s ease-in-out;
     /* Hiệu ứng trượt mượt mà */
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    /* Biến sidebar thành flex container */
+    flex-direction: column;
+    /* Sắp xếp các thành phần con theo chiều dọc */
+    overflow: hidden;
+    /* Ngăn sidebar chính bị cuộn (để nội dung con tự cuộn) */
+}
+
+
+.sidebarContent {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebarSection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .sidebarHeader {
@@ -105,6 +126,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 10px;
+    min-height: 0;
 }
 
 .deviceItem {
@@ -268,6 +290,16 @@
     border-bottom: 3px solid #d83503;
 }
 
+.sessionList {
+    flex: 1;
+    /* Tự động kéo dài */
+    overflow-y: auto;
+    /* Xuất hiện thanh cuộn khi danh sách quá dài */
+    padding: 10px;
+    min-height: 0;
+    /* Rất quan trọng để scroll hoạt động trong Flexbox */
+}
+
 /* Tối ưu danh sách lịch sử */
 .sessionItem {
     padding: 12px;
@@ -320,4 +352,29 @@
 /* Xóa mũi tên nhọn mặc định của Tooltip nếu muốn */
 .trainLabel::before {
     display: none;
+}
+
+.deviceList::-webkit-scrollbar,
+.sessionList::-webkit-scrollbar,
+.sidebarContent::-webkit-scrollbar {
+    width: 6px;
+}
+
+.deviceList::-webkit-scrollbar-track,
+.sessionList::-webkit-scrollbar-track,
+.sidebarContent::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.deviceList::-webkit-scrollbar-thumb,
+.sessionList::-webkit-scrollbar-thumb,
+.sidebarContent::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+.deviceList::-webkit-scrollbar-thumb:hover,
+.sessionList::-webkit-scrollbar-thumb:hover,
+.sidebarContent::-webkit-scrollbar-thumb:hover {
+    background: #999;
 }
