@@ -13,7 +13,7 @@ import styles from "./Map.module.css";
 
 import { GestureHandling } from 'leaflet-gesture-handling';
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
-
+import { io } from "socket.io-client";
 // Đăng ký plugin Leaflet
 L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling);
 
@@ -85,6 +85,26 @@ export default function MapDashboard() {
             fetchSessions();
         }
     }, [filterDate, activeTab]);
+
+    useEffect(() => {
+        const socket = io("http://localhost:4000");
+
+        socket.on("train_update", (data: any) => {
+            setDevices((prev) => ({
+                ...prev,
+                [data.ma_tau]: {
+                    ...prev[data.ma_tau], // Giữ lại metadata cũ
+                    lat: data.lat,
+                    lng: data.lng,
+                    speed: data.speed,
+                    heading: data.heading,
+                    battery: data.battery
+                }
+            }));
+        });
+
+        return () => { socket.disconnect(); };
+    }, []);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -281,7 +301,7 @@ export default function MapDashboard() {
                         <LayersControl.Overlay checked name="Bản đồ OSM">
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         </LayersControl.Overlay>
-                        <LayersControl.Overlay checked name="Mạng lưới đường sắt (OpenRail)">
+                        <LayersControl.Overlay name="Mạng lưới đường sắt (OpenRail)">
                             <TileLayer
                                 url="https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
                                 attribution='&copy; OpenRailwayMap'
@@ -295,6 +315,7 @@ export default function MapDashboard() {
                                 format="image/png"
                                 transparent={true}
                                 version="1.1.1"
+                                zIndex={10}
                             />
                         </LayersControl.Overlay>
 

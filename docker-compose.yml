@@ -41,6 +41,8 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@map_db:5432/${POSTGRES_DB}
     depends_on:
       - map_db
+      - emqx
+      - redis_cache
 
   # 4. Cloudflare Tunnel (Cửa ra Internet)
   tunnel:
@@ -55,3 +57,33 @@ services:
     depends_on:
       - gps-web
       - map_server
+  # 5. EMQX Broker (Nhận dữ liệu từ 250 tàu)
+  emqx:
+    image: emqx/emqx:latest
+    container_name: emqx_broker
+    restart: always
+    ports:
+      - "1883:1883" # MQTT Port
+      - "8083:8083" # WebSocket Port
+      - "18083:18083" # Dashboard Port (admin/public)
+    volumes:
+      - ./emqx_data:/opt/emqx/data
+      - ./emqx_log:/opt/emqx/log
+
+  # 6. Redis (Bộ nhớ đệm cho tọa độ thời gian thực)
+  redis_cache:
+    image: redis:alpine
+    container_name: redis_cache
+    restart: always
+    ports:
+      - "6379:6379"
+  socket-service:
+    build: ./socket-server
+    container_name: socket-service
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      - REDIS_URL=redis://redis_cache:6379
+    depends_on:
+      - redis_cache

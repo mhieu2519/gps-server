@@ -32,7 +32,7 @@ export async function GET() {
             FROM tau t
         `);
 
-        // Chuyển mảng kết quả thành Object Map (Key là ma_tau) để khớp với Frontend cũ
+        // Chuyển mảng kết quả thành Object Map (Key là ma_tau)
         const devices = res.rows.reduce((acc: any, row) => {
             acc[row.ma_tau] = {
                 lat: row.lat,
