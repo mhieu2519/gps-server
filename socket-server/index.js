@@ -1,5 +1,9 @@
-const io = require('socket.io')(4000, {
-    cors: { origin: "*" } // Cho phép Next.js truy cập
+const io = require("socket.io")(server, {
+    cors: {
+        origin: "https://gps-map.online", // Domain của trang web
+        methods: ["GET", "POST"],
+        credentials: true
+    }
 });
 const Redis = require('ioredis');
 
