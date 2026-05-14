@@ -5,7 +5,9 @@ ingress:
   - hostname: gps-map.online
     service: http://gps-web:3000
   - hostname: api.gps-map.online
-    service: http://gps-web:3000
+    service: http://socket-service:4000
   - hostname: geo.gps-map.online
     service: http://map_server:8080
+  - hostname: emqx.gps-map.online
+    service: http://emqx:18083
   - service: http_status:404
