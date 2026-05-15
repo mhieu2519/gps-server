@@ -1,39 +1,62 @@
+// index.js - Socket.io Server để phát dữ liệu thời gian thực từ Redis đến trình duyệt
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const Redis = require('ioredis');
 
 const app = express();
-const server = http.createServer(app); // Định nghĩa 'server' ở đây
+const server = http.createServer(app);
 
-const io = require("socket.io")(server, {
+// Khởi tạo Socket.io
+const io = new Server(server, {
     cors: {
         origin: "https://gps-map.online", // Domain của trang web
         methods: ["GET", "POST"],
         credentials: true
     }
 });
-const Redis = require('ioredis');
 
 // Kết nối Redis (Dùng tên dịch vụ trong Docker)
-const redis = new Redis(process.env.REDIS_URL || 'redis://redis_cache:6379');
+// Sử dụng thêm cơ chế retry để tránh sập nếu Redis khởi động chậm hơn Socket
+const redis = new Redis(process.env.REDIS_URL || 'redis://redis_cache:6379', {
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false
+});
+
+const SUB_CHANNEL = 'train_locations';
 
 // Đăng ký kênh nhận tọa độ
-const SUB_CHANNEL = 'train_locations';
 redis.subscribe(SUB_CHANNEL, (err, count) => {
-    if (err) console.error("❌ Redis Sub Error:", err);
-    console.log(`📡 Đã đăng ký nhận dữ liệu từ ${count} kênh.`);
+    if (err) {
+        console.error("❌ Redis Sub Error:", err.message);
+    } else {
+        console.log(`📡 Đã đăng ký nhận dữ liệu từ ${count} kênh.`);
+    }
 });
 
 // Khi có dữ liệu mới từ Redis, phát ngay tới Client
 redis.on('message', (channel, message) => {
     if (channel === SUB_CHANNEL) {
-        const data = JSON.parse(message);
-        io.emit('train_update', data); // Phát tới toàn bộ trình duyệt đang mở
+        try {
+            const data = JSON.parse(message);
+            io.emit('train_update', data);
+        } catch (e) {
+            console.error("❌ Lỗi parse JSON từ Redis:", e.message);
+        }
     }
 });
 
 io.on('connection', (socket) => {
     console.log(`🔌 Client mới kết nối: ${socket.id}`);
+
+    socket.on('disconnect', () => {
+        console.log(`❌ Client ngắt kết nối: ${socket.id}`);
+    });
 });
 
-console.log("🚀 Socket.io Server đang chạy tại port 4000...");
+// QUAN TRỌNG: Phải có dòng này thì Server mới chạy và không bị Restarting
+const PORT = 4000;
+server.listen(PORT, () => {
+    console.log(`🚀 Socket.io Server đang chạy tại port ${PORT}...`);
+});
