@@ -48,6 +48,7 @@ services:
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared-tunnel
+    hostname: gps-server-tunnel
     restart: always
     command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
 
