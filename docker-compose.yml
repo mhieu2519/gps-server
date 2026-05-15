@@ -49,11 +49,8 @@ services:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared-tunnel
     restart: always
-    command: tunnel --config /etc/cloudflared/config.yml run
-    environment:
-      - TUNNEL_ID=${TUNNEL_ID}
-    volumes:
-      - ./cloudflared:/etc/cloudflared
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+
     depends_on:
       - gps-web
       - map_server
