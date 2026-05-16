@@ -59,14 +59,14 @@ export async function GET(request: Request) {
         // Nếu có truyền ngày lên, thêm điều kiện WHERE
         if (selectedDate) {
             // Chuyển timestamp (bigint) thành Date để so sánh với chuỗi YYYY-MM-DD
-            sqlQuery += ` WHERE TO_TIMESTAMP(timestamp/1000)::date = $1::date `;
+            sqlQuery += ` WHERE TO_TIMESTAMP(timestamp)::date = $1::date `;
             queryParams.push(selectedDate);
         }
 
         sqlQuery += `
             GROUP BY session_id, ma_tau
             ORDER BY bat_dau DESC
-            LIMIT 100
+            LIMIT 200
         `;
 
         const listRes = await client.query(sqlQuery, queryParams);
