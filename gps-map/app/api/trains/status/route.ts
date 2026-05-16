@@ -1,5 +1,6 @@
 //app/api/trains/status/route.ts
-
+//API để trang web lấy trạng thái toàn bộ tàu khi người dùng vừa mới load trang 
+//để khởi tạo biến devices
 import { NextResponse } from 'next/server';
 import { Client } from 'pg';
 
@@ -41,7 +42,7 @@ export async function GET() {
                 heading: row.heading,
                 battery: row.battery,
                 signal: row.signal,
-                timestamp: Number(row.timestamp), // PostgreSQL BIGINT trả về string nên cần ép kiểu số
+                timestamp: Number(row.timestamp), //ép kiểu số do PostgreSQL BIGINT trả về string 
                 danh_sach_toa: row.danh_sach_toa
             };
             return acc;

@@ -68,11 +68,11 @@ export default function MapDashboard() {
     const [mapBounds, setMapBounds] = useState<L.LatLngBoundsExpression | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedWagon, setSelectedWagon] = useState<any>(null);
-    // Các tab có thể là: 'live' (đang hoạt động), 'history' (lịch sử)
+
     const [activeTab, setActiveTab] = useState<'live' | 'history'>('live');
     const sidebarRef = useRef<HTMLDivElement>(null);
     const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]); // Mặc định là hôm nay
-    // Hàm này sẽ gọi lại mỗi khi filterDate thay đổi
+    // gọi lại mỗi khi filterDate thay đổi
     useEffect(() => {
         const fetchSessions = async () => {
             const res = await fetch(`/api/trains/history?date=${filterDate}`);
@@ -97,12 +97,14 @@ export default function MapDashboard() {
             setDevices((prev) => ({
                 ...prev,
                 [data.ma_tau]: {
-                    ...prev[data.ma_tau], // Giữ lại metadata cũ
-                    lat: data.lat,
-                    lng: data.lng,
-                    speed: data.speed,
-                    heading: data.heading,
-                    battery: data.battery
+                    ...prev[data.ma_tau],
+                    lat: Number(data.lat),
+                    lng: Number(data.lng),
+                    speed: Number(data.speed),
+                    heading: Number(data.heading),
+
+                    battery: data.payload?.battery || prev[data.ma_tau]?.battery,
+                    signal: data.payload?.signal || prev[data.ma_tau]?.signal
                 }
             }));
         });
@@ -112,7 +114,7 @@ export default function MapDashboard() {
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
-            // Nếu sidebar đang mở VÀ vị trí click không nằm trong sidebarRef
+            // Nếu sidebar đang mở và vị trí click không nằm trong sidebarRef
             if (isSidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
                 setIsSidebarOpen(false);
             }
@@ -126,7 +128,7 @@ export default function MapDashboard() {
         };
     }, [isSidebarOpen]);
 
-    // 1. Tải danh sách Sessions (Lịch sử) - Chỉ chạy 1 lần
+    // Tải danh sách Sessions (Lịch sử) - Chỉ chạy 1 lần
     useEffect(() => {
         const fetchSessions = async () => {
             try {
@@ -137,7 +139,7 @@ export default function MapDashboard() {
         fetchSessions();
     }, []);
 
-    // 2. Tải vị trí Realtime - Chạy mỗi 5 giây
+    // Tải vị trí Realtime - Chạy mỗi 5 giây
     const loadRealtimeData = useCallback(async () => {
         try {
             const res = await fetch("/api/trains/status");
@@ -156,7 +158,7 @@ export default function MapDashboard() {
         return () => clearInterval(interval);
     }, [loadRealtimeData]);
 
-    // 3. Xử lý xem lại lịch sử
+    // Xử lý xem lại lịch sử
     const handleViewHistory = async (sessionId: string) => {
         try {
             const res = await fetch(`/api/trains/history?session_id=${sessionId}`);
@@ -205,7 +207,7 @@ export default function MapDashboard() {
                     </button>
                 </div>
                 <div className={styles.sidebarContent}>
-                    {/* Phần 1: Danh sách tàu trực tuyến */}
+                    {/* Danh sách tàu trực tuyến */}
                     {activeTab === 'live' && (
                         <div className={styles.sidebarSection}>
                             <h3 className={styles.sectionTitle}>📡 Đang hoạt động ({Object.keys(devices).length})</h3>
@@ -235,7 +237,7 @@ export default function MapDashboard() {
                         </div>
                     )}
 
-                    {/* Phần 2: Xem lại hành trình */}
+                    {/* Xem lại hành trình */}
 
                     {activeTab === 'history' && (
                         <div className={styles.sidebarSection}>
@@ -282,7 +284,7 @@ export default function MapDashboard() {
                 </div>
             </div>
 
-            {/* Map Area */}
+            {/* khu vực bản đồ */}
             <div className={styles.mapWrapper}>
                 <MapContainer
                     {...({
@@ -294,7 +296,7 @@ export default function MapDashboard() {
                         scrollWheelZoom: true
                     } as any)}
                 >
-                    {/* 2. Nút điều khiển zoom */}
+                    {/* nút điều khiển zoom */}
                     {/* Các vị trí "topleft", "topright", "bottomleft", "bottomright" */}
                     <ZoomControl position="bottomright" />
 

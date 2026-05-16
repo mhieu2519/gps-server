@@ -1,4 +1,7 @@
 //../api/trains/history/route.ts
+// API phục vụ tính năng "Xem lại hành trình". 
+// lấy dữ liệu từ bảng lich_su_tau
+
 import { NextResponse } from 'next/server';
 import { Pool } from 'pg';
 
@@ -13,7 +16,7 @@ export async function GET(request: Request) {
     const selectedDate = searchParams.get('date');
     const client = await pool.connect();
     try {
-        // TRƯỜNG HỢP 1: Lấy tọa độ chi tiết của một Session cụ thể (để vẽ map)
+        // Lấy tọa độ chi tiết của một Session cụ thể (để vẽ map)
         if (sessionId) {
             const res = await client.query(`
                 SELECT 
@@ -38,9 +41,9 @@ export async function GET(request: Request) {
             });
         }
 
-        // TRƯỜNG HỢP 2: Lấy danh sách tổng hợp các Session (để hiện danh sách ở Sidebar)
+        // Lấy danh sách tổng hợp các Session (để hiện danh sách ở Sidebar)
         // Gom nhóm theo session_id để biết mỗi chuyến bắt đầu và kết thúc khi nào
-        // TRƯỜNG HỢP 2: Lấy danh sách Session (SỬA ĐOẠN NÀY)
+
         let sqlQuery = `
             SELECT 
                 session_id, 

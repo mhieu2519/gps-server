@@ -9,7 +9,7 @@ export default function ContactPage() {
                 </h1>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Cột 1: Thông tin cá nhân */}
+                    {/*  Thông tin cá nhân */}
                     <div className="bg-white p-8 rounded-xl shadow-sm border">
                         <h2 className="text-xl font-bold text-cyan-800 mb-4 border-b pb-2">
                             Sinh viên thực hiện
@@ -25,7 +25,7 @@ export default function ContactPage() {
                         </p>
                     </div>
 
-                    {/* Cột 2: Kênh hỗ trợ */}
+                    {/* Kênh hỗ trợ */}
                     <div className="bg-white p-8 rounded-xl shadow-sm border">
                         <h2 className="text-xl font-bold text-cyan-800 mb-4 border-b pb-2">
                             Kênh hỗ trợ

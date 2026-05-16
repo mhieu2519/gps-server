@@ -7,7 +7,7 @@ export default function AboutPage() {
                 Dự án cho phép theo dõi trực quan hóa vị trí đoàn tàu, lịch sử di chuyển và thông số kỹ thuật
                 thông qua giao diện bản đồ trực quan. Đây là sản phẩm nghiên cứu phục vụ đồ án tốt nghiệp tại Trường Điện- Điện tử.
             </p>
-            {/* Thêm các nội dung chi tiết khác ở đây */}
+
         </div>
     );
 }

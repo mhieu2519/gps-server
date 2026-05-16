@@ -249,7 +249,6 @@
 .loadBarFill {
     height: 100%;
     background: #52c41a;
-    /* Màu xanh lá */
     transition: width 0.5s ease;
 }
 
@@ -297,10 +296,10 @@
     /* Xuất hiện thanh cuộn khi danh sách quá dài */
     padding: 10px;
     min-height: 0;
-    /* Rất quan trọng để scroll hoạt động trong Flexbox */
+    /* để scroll hoạt động trong Flexbox */
 }
 
-/* Tối ưu danh sách lịch sử */
+/* danh sách lịch sử */
 .sessionItem {
     padding: 12px;
     /*border-bottom: 1px solid #222;*/
@@ -345,11 +344,9 @@
     font-weight: bold;
     font-size: 12px;
     color: #d32f2f;
-    /* Màu đỏ hoặc màu bạn thích */
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Xóa mũi tên nhọn mặc định của Tooltip nếu muốn */
 .trainLabel::before {
     display: none;
 }

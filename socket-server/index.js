@@ -11,14 +11,14 @@ const server = http.createServer(app);
 // Khởi tạo Socket.io
 const io = new Server(server, {
     cors: {
-        origin: "https://gps-map.online", // Domain của trang web
+        origin: "https://gps-map.online", // Domain
         methods: ["GET", "POST"],
         credentials: true
     }
 });
 
 // Kết nối Redis (Dùng tên dịch vụ trong Docker)
-// Sử dụng thêm cơ chế retry để tránh sập nếu Redis khởi động chậm hơn Socket
+// dùng cơ chế retry để tránh sập khi Redis khởi động chậm hơn Socket
 const redis = new Redis(process.env.REDIS_URL || 'redis://redis_cache:6379', {
     maxRetriesPerRequest: null,
     enableReadyCheck: false
@@ -35,7 +35,7 @@ redis.subscribe(SUB_CHANNEL, (err, count) => {
     }
 });
 
-// Khi có dữ liệu mới từ Redis, phát ngay tới Client
+// Khi có dữ liệu mới từ Redis, gửi tới Client
 redis.on('message', (channel, message) => {
     if (channel === SUB_CHANNEL) {
         try {
@@ -55,7 +55,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// QUAN TRỌNG: Phải có dòng này thì Server mới chạy và không bị Restarting
+
 const PORT = 4000;
 server.listen(PORT, () => {
     console.log(`🚀 Socket.io Server đang chạy tại port ${PORT}...`);
