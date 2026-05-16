@@ -48,8 +48,10 @@ export async function GET(request: Request) {
             SELECT 
                 session_id, 
                 ma_tau, 
-                MIN(timestamp) as bat_dau, 
-                MAX(timestamp) as ket_thuc,
+                -- MIN(timestamp) as bat_dau, 
+                --MAX(timestamp) as ket_thuc,
+                EXTRACT(EPOCH FROM TO_TIMESTAMP(MIN(timestamp)))::int8 as bat_dau,
+                EXTRACT(EPOCH FROM TO_TIMESTAMP(MAX(timestamp)))::int8 as ket_thuc,
                 COUNT(*) as so_diem
             FROM lich_su_tau
         `;

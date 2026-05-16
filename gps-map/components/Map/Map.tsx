@@ -265,8 +265,20 @@ export default function MapDashboard() {
                                                 <b>{s.ma_tau}</b>
                                                 <span className={styles.sessionPoints}>{s.so_diem} điểm GPS</span>
                                             </div>
+                                            {/* Hiển thị thời gian bắt đầu và kết thúc 
                                             <div className={styles.sessionTime}>
                                                 🕒 {new Date(s.bat_dau * 1000).toLocaleTimeString()} - {new Date(s.ket_thuc * 1000).toLocaleTimeString()}
+                                            </div>*/}
+                                            <div className={styles.sessionTime}>
+                                                🕒 {
+                                                    isNaN(Number(s.bat_dau)) || Number(s.bat_dau) < 0 ? "Không rõ" :
+                                                        new Date(Number(s.bat_dau) * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+                                                }
+                                                {" - "}
+                                                {
+                                                    isNaN(Number(s.ket_thuc)) || Number(s.ket_thuc) < 0 ? "Không rõ" :
+                                                        new Date(Number(s.ket_thuc) * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+                                                }
                                             </div>
                                         </div>
                                     ))
