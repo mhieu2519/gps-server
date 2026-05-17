@@ -14,6 +14,9 @@ import styles from "./Map.module.css";
 import { GestureHandling } from 'leaflet-gesture-handling';
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
 import { io } from "socket.io-client";
+import SmoothTrainMarker from "./SmoothTrainMarker";
+
+
 // Đăng ký plugin Leaflet
 L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling);
 
@@ -372,14 +375,15 @@ export default function MapDashboard() {
                         <LayersControl.Overlay checked name="Vị trí tàu tức thời">
                             <LayerGroup>
                                 {Object.keys(devices).map((id) => (
-                                    <Marker
+                                    <SmoothTrainMarker
                                         key={id}
-                                        position={[devices[id].lat, devices[id].lng]}
+                                        targetPosition={[devices[id].lat, devices[id].lng]}
+                                        heading={devices[id].heading}
+                                        duration={2000}
                                         icon={trainIcon}
-
-                                        rotationAngle={devices[id].heading}
-                                        rotationOrigin="center"
                                     >
+
+
                                         <Tooltip
                                             permanent
                                             direction="right"
@@ -433,7 +437,7 @@ export default function MapDashboard() {
                                                 )}
                                             </div>
                                         </Popup>
-                                    </Marker>
+                                    </SmoothTrainMarker>
                                 ))}
                             </LayerGroup>
                         </LayersControl.Overlay>
