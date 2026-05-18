@@ -7,6 +7,7 @@ const Redis = require('ioredis');
 
 const app = express();
 const server = http.createServer(app);
+app.use(express.static('public'));
 
 // Khởi tạo Socket.io
 const io = new Server(server, {
@@ -68,7 +69,9 @@ app.get('/', (req, res) => {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>GPS Railway Gateway</title>
+            <title>GPS Tracking</title>
+            <meta name="description" content="Real-time GPS tracking application">
+            <link rel="icon" type="image/x-icon" href="/favicon.ico">
             <style>
                 body {
                     margin: 0;
@@ -99,6 +102,7 @@ app.get('/', (req, res) => {
                     margin-bottom: 10px;
                     color: #e14eca;
                 }
+
                 p {
                     color: #9a9a9a;
                     font-size: 15px;

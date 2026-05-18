@@ -83,7 +83,8 @@ services:
     ports:
       - "4000:4000"
     environment:
-      - REDIS_URL=redis://redis_cache:6379
+      - REDIS_URL=${REDIS_URL}
+      - DOMAIN=${DOMAIN}
       - MQTT_HOST=emqx
       - MQTT_PORT=1883
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@map_db:5432/${POSTGRES_DB}
