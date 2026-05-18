@@ -57,11 +57,8 @@ io.on('connection', (socket) => {
 });
 
 
-const PORT = 4000;
-server.listen(PORT, () => {
-    console.log(`🚀 Socket.io Server đang chạy tại port ${PORT}...`);
-});
-// Thay thế hoặc thêm đoạn xử lý route '/' trong socket-service (cổng 4000)
+
+// Trang chủ đơn giản hướng dẫn người dùng
 app.get('/', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -136,4 +133,9 @@ app.get('/', (req, res) => {
         </body>
         </html>
     `);
+});
+
+const PORT = 4000;
+server.listen(PORT, () => {
+    console.log(`🚀 Socket.io Server đang chạy tại port ${PORT}...`);
 });
