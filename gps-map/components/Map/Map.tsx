@@ -90,7 +90,7 @@ export default function MapDashboard() {
     }, [filterDate, activeTab]);
 
     useEffect(() => {
-        //const socket = io("http://localhost:4000");
+
         const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
         const socket = io(SOCKET_URL, {
             transports: ["websocket", "polling"], // Ưu tiên websocket
