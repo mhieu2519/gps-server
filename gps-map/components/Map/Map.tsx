@@ -96,6 +96,18 @@ export default function MapDashboard() {
             transports: ["websocket", "polling"], // Ưu tiên websocket
             withCredentials: true
         });
+        socket.on("connect", () => {
+            console.log("🟢 Socket.io đã kết nối thành công! ID:", socket.id);
+        });
+
+        socket.on("connect_error", (err) => {
+            console.error("🔴 Lỗi kết nối Socket.io:", err.message);
+        });
+
+        socket.on("train_update", (data: any) => {
+            console.log("📥 Nhận dữ liệu realtime từ tàu:", data);
+            // setDevices...
+        });
         socket.on("train_update", (data: any) => {
             setDevices((prev) => {
                 // Nếu tàu này chưa từng tồn tại trong state (do API chưa kịp load), bỏ qua hoặc khởi tạo rỗng
@@ -161,8 +173,8 @@ export default function MapDashboard() {
 
     useEffect(() => {
         loadRealtimeData();
-        //const interval = setInterval(loadRealtimeData, 5000);
-        //return () => clearInterval(interval);
+        const interval = setInterval(loadRealtimeData, 5000);
+        return () => clearInterval(interval);
     }, [loadRealtimeData]);
 
     // Xử lý xem lại lịch sử
