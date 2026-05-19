@@ -379,7 +379,7 @@ export default function MapDashboard() {
                                         key={id}
                                         targetPosition={[devices[id].lat, devices[id].lng]}
                                         heading={devices[id].heading}
-                                        duration={2000}
+                                        duration={200}
                                         icon={trainIcon}
                                     >
 
