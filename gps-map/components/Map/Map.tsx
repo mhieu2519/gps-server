@@ -97,19 +97,19 @@ export default function MapDashboard() {
             withCredentials: true
         });
         socket.on("connect", () => {
-            console.log("🟢 Socket.io đã kết nối thành công! ID:", socket.id);
+            // console.log("🟢 Socket.io đã kết nối thành công! ID:", socket.id);
         });
 
         socket.on("connect_error", (err) => {
-            console.error("🔴 Lỗi kết nối Socket.io:", err.message);
+            // console.error("🔴 Lỗi kết nối Socket.io:", err.message);
         });
 
         socket.on("train_update", (data: any) => {
-            console.log("📥 Nhận dữ liệu realtime từ tàu:", data);
+            // console.log("📥 Nhận dữ liệu realtime từ tàu:", data);
             // setDevices...
         });
         socket.on("train_update", (data: any) => {
-            console.log(`🚀 Tàu ${data.ma_tau} gửi tọa độ mới: Lat=${data.lat}, Lng=${data.lng}`);
+            // console.log(`🚀 Tàu ${data.ma_tau} gửi tọa độ mới: Lat=${data.lat}, Lng=${data.lng}`);
 
             // In hẳn object map hiện tại ra xem có bị ghi đè lung tung không
             setDevices((prev) => {
@@ -123,7 +123,7 @@ export default function MapDashboard() {
                         heading: Number(data.heading || 0),
                     }
                 };
-                console.log("📊 State [devices] sau khi up từ Socket:", update);
+                // console.log("📊 State [devices] sau khi up từ Socket:", update);
                 return update;
             });
         });
@@ -146,7 +146,7 @@ export default function MapDashboard() {
         };
     }, [isSidebarOpen]);
 
-    // Tải danh sách Sessions (Lịch sử) - Chỉ chạy 1 lần
+    // Tải danh sách Sessions (Lịch sử) - Chạy 1 lần
     useEffect(() => {
         const fetchSessions = async () => {
             try {
@@ -157,7 +157,7 @@ export default function MapDashboard() {
         fetchSessions();
     }, []);
 
-    // Tải vị trí Realtime - Chạy mỗi 5 giây
+    // Tải vị trí Realtime - Chạy mỗi 5 phút để cập nhật phòng trường hợp có trục trặc Socket
     const loadRealtimeData = useCallback(async () => {
         try {
             const res = await fetch("/api/trains/status");
@@ -172,7 +172,7 @@ export default function MapDashboard() {
 
     useEffect(() => {
         loadRealtimeData();
-        const interval = setInterval(loadRealtimeData, 5000);
+        const interval = setInterval(loadRealtimeData, 5 * 60 * 1000);
         return () => clearInterval(interval);
     }, [loadRealtimeData]);
 
