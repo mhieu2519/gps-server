@@ -1,3 +1,4 @@
+//
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -16,11 +17,15 @@ export default function SmoothTrainMarker({ targetPosition, heading, duration = 
   const [currentPosition, setCurrentPosition] = useState<[number, number]>(targetPosition);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
-  const startPosRef = useRef<[number, number]>(targetPosition);
+  const previousTargetPosRef = useRef<[number, number]>(targetPosition);
 
   useEffect(() => {
-    // mỗi khi nhận tọa độ mới từ Socket tiến hành thực hiện nội suy tuyến tính (Lerp)
-    startPosRef.current = currentPosition;
+    // Điểm bắt đầu nội suy (start) chính là điểm đích (target) của chu kỳ trước
+    const startLat = previousTargetPosRef.current[0];
+    const startLng = previousTargetPosRef.current[1];
+
+    // Cập nhật lại vị trí đích hiện tại vào ref để dùng cho chu kỳ kế tiếp
+    previousTargetPosRef.current = targetPosition;
     startTimeRef.current = performance.now();
 
     const animate = (now: number) => {
@@ -30,8 +35,8 @@ export default function SmoothTrainMarker({ targetPosition, heading, duration = 
       const progress = Math.min(elapsed / duration, 1); // chạy từ 0 đến 1
 
       // tính tọa độ vị trí hiện thời giữa điểm cũ và điểm mới
-      const currentLat = startPosRef.current[0] + (targetPosition[0] - startPosRef.current[0]) * progress;
-      const currentLng = startPosRef.current[1] + (targetPosition[1] - startPosRef.current[1]) * progress;
+      const currentLat = startLat + (targetPosition[0] - startLat) * progress;
+      const currentLng = startLng + (targetPosition[1] - startLng) * progress;
 
       setCurrentPosition([currentLat, currentLng]);
 

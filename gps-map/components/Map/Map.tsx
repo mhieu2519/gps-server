@@ -157,8 +157,8 @@ export default function MapDashboard() {
 
     useEffect(() => {
         loadRealtimeData();
-        const interval = setInterval(loadRealtimeData, 5000);
-        return () => clearInterval(interval);
+        //const interval = setInterval(loadRealtimeData, 5000);
+        //return () => clearInterval(interval);
     }, [loadRealtimeData]);
 
     // Xử lý xem lại lịch sử
@@ -379,7 +379,7 @@ export default function MapDashboard() {
                                         key={id}
                                         targetPosition={[devices[id].lat, devices[id].lng]}
                                         heading={devices[id].heading}
-                                        duration={200}
+                                        duration={2000}
                                         icon={trainIcon}
                                     >
 
