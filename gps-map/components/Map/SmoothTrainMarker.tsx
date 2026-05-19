@@ -1,11 +1,10 @@
-//
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Marker } from "react-leaflet";
 import L from "leaflet";
 
-interface SmoothTrainMarkerProps {
+interface Props {
   targetPosition: [number, number];
   heading: number;
   duration?: number;
@@ -13,32 +12,43 @@ interface SmoothTrainMarkerProps {
   children: React.ReactNode;
 }
 
-export default function SmoothTrainMarker({ targetPosition, heading, duration = 2000, icon, children }: SmoothTrainMarkerProps) {
-  const [currentPosition, setCurrentPosition] = useState<[number, number]>(targetPosition);
+export default function SmoothTrainMarker({
+  targetPosition,
+  heading,
+  duration = 200,
+  icon,
+  children
+}: Props) {
+
+  const markerRef = useRef<L.Marker | null>(null);
   const animationRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-  const previousTargetPosRef = useRef<[number, number]>(targetPosition);
+
+  const currentPosRef = useRef<[number, number]>(targetPosition);
 
   useEffect(() => {
-    // Điểm bắt đầu nội suy (start) chính là điểm đích (target) của chu kỳ trước
-    const startLat = previousTargetPosRef.current[0];
-    const startLng = previousTargetPosRef.current[1];
 
-    // Cập nhật lại vị trí đích hiện tại vào ref để dùng cho chu kỳ kế tiếp
-    previousTargetPosRef.current = targetPosition;
-    startTimeRef.current = performance.now();
+    const start = performance.now();
+    const startPos = currentPosRef.current;
 
     const animate = (now: number) => {
-      if (!startTimeRef.current) return;
 
-      const elapsed = now - startTimeRef.current;
-      const progress = Math.min(elapsed / duration, 1); // chạy từ 0 đến 1
+      const progress = Math.min((now - start) / duration, 1);
 
-      // tính tọa độ vị trí hiện thời giữa điểm cũ và điểm mới
-      const currentLat = startLat + (targetPosition[0] - startLat) * progress;
-      const currentLng = startLng + (targetPosition[1] - startLng) * progress;
+      const lat =
+        startPos[0] +
+        (targetPosition[0] - startPos[0]) * progress;
 
-      setCurrentPosition([currentLat, currentLng]);
+      const lng =
+        startPos[1] +
+        (targetPosition[1] - startPos[1]) * progress;
+
+      const pos: [number, number] = [lat, lng];
+
+      currentPosRef.current = pos;
+
+      if (markerRef.current) {
+        markerRef.current.setLatLng(pos);
+      }
 
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(animate);
@@ -48,13 +58,17 @@ export default function SmoothTrainMarker({ targetPosition, heading, duration = 
     animationRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      if (animationRef.current !== null) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
+
   }, [targetPosition, duration]);
 
   return (
     <Marker
-      position={currentPosition}
+      ref={markerRef}
+      position={targetPosition}
       icon={icon}
       rotationAngle={heading}
       rotationOrigin="center"
