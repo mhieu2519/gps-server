@@ -97,19 +97,23 @@ export default function MapDashboard() {
             withCredentials: true
         });
         socket.on("train_update", (data: any) => {
-            setDevices((prev) => ({
-                ...prev,
-                [data.ma_tau]: {
-                    ...prev[data.ma_tau],
-                    lat: Number(data.lat),
-                    lng: Number(data.lng),
-                    speed: Number(data.speed),
-                    heading: Number(data.heading),
+            setDevices((prev) => {
+                // Nếu tàu này chưa từng tồn tại trong state (do API chưa kịp load), bỏ qua hoặc khởi tạo rỗng
+                const oldDevice = prev[data.ma_tau] || {};
 
-                    battery: data.payload?.battery || prev[data.ma_tau]?.battery,
-                    signal: data.payload?.signal || prev[data.ma_tau]?.signal
-                }
-            }));
+                return {
+                    ...prev,
+                    [data.ma_tau]: {
+                        ...oldDevice, // Giữ lại danh_sach_toa và các thông tin cũ từ API
+                        lat: Number(data.lat),
+                        lng: Number(data.lng),
+                        speed: Number(data.speed),
+                        heading: Number(data.heading),
+                        battery: data.payload?.battery || oldDevice.battery || 100,
+                        signal: data.payload?.signal || oldDevice.signal || 4
+                    }
+                };
+            });
         });
 
         return () => { socket.disconnect(); };
