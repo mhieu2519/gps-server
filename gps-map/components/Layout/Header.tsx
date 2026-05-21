@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
-import LoginModal from "./LoginModal"; // Đảm bảo file LoginModal.tsx nằm cùng thư mục này
+import LoginModal from "./LoginModal";
 
 export default function Header() {
     // 1. Lấy thông tin phiên đăng nhập và trạng thái từ NextAuth
@@ -41,13 +41,10 @@ export default function Header() {
                         </Link>
                     </nav>
 
-                    {/* KHU VỰC XỬ LÝ NÚT ĐĂNG NHẬP / THÔNG TIN USER DỰA TRÊN STATUS */}
+                    {/* Khu vực hiển thị thông tin người dùng hoặc nút đăng nhập */}
                     <div className="flex items-center gap-4">
-                        {status === "loading" ? (
-                            // Trạng thái đang kiểm tra cookie/session
-                            <span className="text-sm text-gray-400 font-medium">Đang tải...</span>
-                        ) : session ? (
-                            // TRẠNG THÁI: ĐÃ ĐĂNG NHẬP THÀNH CÔNG
+                        {session && status === "authenticated" ? (
+                            // đăng nhập
                             <div className="flex items-center gap-3">
                                 <span className="text-sm text-gray-700 font-medium">
                                     Xin chào,{" "}
@@ -63,7 +60,7 @@ export default function Header() {
                                 </button>
                             </div>
                         ) : (
-                            // TRẠNG THÁI: CHƯA ĐĂNG NHẬP (Mặc định)
+                            // chưa đăng nhập
                             <button
                                 onClick={() => setIsModalOpen(true)} // Click vào đây sẽ mở popup lên
                                 className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
@@ -72,10 +69,11 @@ export default function Header() {
                             </button>
                         )}
                     </div>
+
                 </div>
             </header>
 
-            {/* 3. Gọi component Popup nằm ẩn ở đây, điều khiển đóng mở qua State */}
+            {/* component Popup nằm ẩn, điều khiển đóng mở qua State */}
             <LoginModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </>
     );
