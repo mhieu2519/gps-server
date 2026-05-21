@@ -4,7 +4,7 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
-
+import NextAuthProvider from "@/components/provider/NextAuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,12 +31,14 @@ export default function RootLayout({
       <body
         className={`flex flex-col min-h-screen ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <NextAuthProvider>
 
-        <Header />
-        <main className="flex-grow pt-16 pb-10">
-          {children}
-        </main>
-        <Footer />
+          <Header />
+          <main className="flex-grow pt-16 pb-10">
+            {children}
+          </main>
+          <Footer />
+        </NextAuthProvider>
       </body>
     </html>
   );
