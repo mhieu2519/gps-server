@@ -5,6 +5,12 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import LoginModal from "./LoginModal";
 
+//icon
+import { FaChartLine } from "react-icons/fa";
+import { FaTrain } from "react-icons/fa6";
+import { GiCaptainHatProfile } from "react-icons/gi";
+
+
 export default function Header() {
     const { data: session, status } = useSession();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,35 +65,49 @@ export default function Header() {
                                             <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Tài khoản</p>
                                             <p className="text-sm font-bold text-gray-800 truncate mt-0.5">{session.user.name}</p>
                                             <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-bold mt-1 ${session.user.role === "admin"
-                                                    ? "bg-amber-50 text-amber-600 border border-amber-200"
-                                                    : "bg-cyan-50 text-cyan-600 border border-cyan-200"
+                                                ? "bg-amber-50 text-amber-600 border border-amber-200"
+                                                : "bg-cyan-50 text-cyan-600 border border-cyan-200"
                                                 }`}>
-                                                {session.user.role === "admin" ? "Hệ thống Admin" : "Thành viên"}
+                                                {session.user.role === "admin" ? "Quản trị viên" : "Thành viên"}
                                             </span>
                                         </div>
 
                                         {/* Các chức năng */}
                                         <div className="py-1">
                                             <Link href="/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-cyan-600 transition">
-                                                👤 Trang cá nhân
+
+                                                <GiCaptainHatProfile />
+                                                <span className="ml-2">
+                                                    Trang cá nhân
+                                                </span>
+
                                             </Link>
 
                                             {/* CHỨC NĂNG ADMIN: Đưa Điều phối toa vào đây */}
                                             {session.user.role === "admin" && (
                                                 <>
-                                                    <Link
-                                                        href="/admin/dispatch"
-                                                        onClick={() => setIsDropdownOpen(false)}
-                                                        className="flex items-center px-4 py-2.5 text-sm text-amber-600 bg-amber-50/50 hover:bg-amber-50 font-bold transition"
-                                                    >
-                                                        ⚙️ Điều phối toa tàu
-                                                    </Link>
+
                                                     <Link
                                                         href="/admin/dashboard"
                                                         onClick={() => setIsDropdownOpen(false)}
                                                         className="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition"
                                                     >
-                                                        📊 Quản lý hệ thống
+                                                        <FaChartLine />
+                                                        <span className="ml-2">
+                                                            Thống kê
+                                                        </span>
+                                                    </Link>
+                                                    <Link
+                                                        href="/admin/dispatch"
+                                                        onClick={() => setIsDropdownOpen(false)}
+                                                        className="flex items-center px-4 py-2.5 text-sm text-amber-600 bg-amber-50/50 hover:bg-amber-50 font-bold transition"
+                                                    >
+
+                                                        <FaTrain />
+                                                        <span className="ml-2">
+                                                            Điều phối toa
+                                                        </span>
+
                                                     </Link>
                                                 </>
                                             )}
@@ -97,9 +117,9 @@ export default function Header() {
                                         <div className="border-t border-gray-100 pt-1 mt-1">
                                             <button
                                                 onClick={() => signOut({ callbackUrl: "/" })}
-                                                className="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 font-medium transition"
+                                                className="w-full text-left flex items-center px-4 py-2.5 text-sm text-cyan-500 hover:bg-cyan-50 font-medium transition"
                                             >
-                                                🚪 Đăng xuất
+                                                Đăng xuất
                                             </button>
                                         </div>
                                     </div>
