@@ -65,7 +65,7 @@ services:
   # 5. EMQX Broker (Nhận dữ liệu từ tàu)
   emqx:
     image: emqx/emqx:latest
-    container_name: emqx_broker
+    container_name: emqx
     restart: always
     ports:
       - "1883:1883" # MQTT Port
@@ -108,6 +108,7 @@ services:
       - emqx
       - map_db
     networks:
+
       - gps_network
   # --- ĐỊNH NGHĨA MẠNG CHUNG ---
 networks:
