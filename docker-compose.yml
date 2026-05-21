@@ -23,7 +23,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./geoserver_data:/opt/geoserver/data_dir
+      - ./geoserver_data:/usr/local/geoserver/data_dir
     environment:
       - GEOSERVER_CSRF_WHITELIST=geo.gps-map.online
       - GEOSERVER_CSRF_DISABLED=true
@@ -87,6 +87,8 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    volumes:
+      - ./redis_data:/data
     networks:
       - gps_network
   socket-service:
