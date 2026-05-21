@@ -54,7 +54,6 @@ services:
     hostname: gps-server-tunnel
     restart: always
     command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
-
     depends_on:
       - gps-web
       - map_server
@@ -108,9 +107,8 @@ services:
       - emqx
       - map_db
     networks:
-
       - gps_network
-  # --- ĐỊNH NGHĨA MẠNG CHUNG ---
+
 networks:
   gps_network:
     driver: bridge
