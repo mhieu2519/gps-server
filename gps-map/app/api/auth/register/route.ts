@@ -17,7 +17,7 @@ export async function POST(request: Request) {
         }
 
         // 2. Kết nối CSDL kiểm tra xem tài khoản này đã được đăng ký chưa
-        const checkQuery = "SELECT * FROM accounts WHERE user = $1 LIMIT 1";
+        const checkQuery = "SELECT * FROM tai_khoan WHERE ten_dang_nhap = $1 LIMIT 1";
         const checkResult = await db.query(checkQuery, [user]);
 
         if (checkResult.rows.length > 0) {
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(passwd, saltRounds);
 
-        // 4. Chèn dữ liệu tài khoản mới vào bảng accounts trong DBeaver
-        // Cột 'role' gán cứng giá trị là 'user', cột 'lasttime' tạm thời để NULL
+        // 4. Chèn dữ liệu tài khoản mới vào bảng tai_khoan trong DBeaver
+        // Cột 'role' gán cứng giá trị là 'user', cột 'lastTime' tạm thời để NULL
         const insertQuery = `
             INSERT INTO tai_khoan (ten_dang_nhap, mat_khau, vai_tro, lastTime) 
             VALUES ($1, $2, $3, NULL)
