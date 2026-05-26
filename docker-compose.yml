@@ -76,6 +76,7 @@ services:
     environment:
       - EMQX_ERLANG__ASYNC_THREADS=4
       - EMQX_ERLANG__MAX_PORTS=65536
+      - EMQX_DASHBOARD__LISTENERS__HTTP__BIND=0.0.0.0:18083 # Mở cổng dashboard cho tất cả IP
     networks:
       - gps_network
 
