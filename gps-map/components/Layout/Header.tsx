@@ -9,6 +9,7 @@ import LoginModal from "./LoginModal";
 import { FaChartLine } from "react-icons/fa";
 import { FaTrain } from "react-icons/fa6";
 import { GiCaptainHatProfile } from "react-icons/gi";
+import { FcBullish } from "react-icons/fc";
 
 
 export default function Header() {
@@ -92,7 +93,7 @@ export default function Header() {
                                                         onClick={() => setIsDropdownOpen(false)}
                                                         className="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition"
                                                     >
-                                                        <FaChartLine />
+                                                        <FcBullish />
                                                         <span className="ml-2">
                                                             Thống kê
                                                         </span>
