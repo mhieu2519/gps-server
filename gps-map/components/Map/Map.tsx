@@ -15,7 +15,7 @@ import { GestureHandling } from 'leaflet-gesture-handling';
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
 import { io } from "socket.io-client";
 import SmoothTrainMarker from "./SmoothTrainMarker";
-
+import { FcMenu } from "react-icons/fc";
 
 // Đăng ký plugin Leaflet
 L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling);
@@ -194,7 +194,7 @@ export default function MapDashboard() {
             {/* Nút mở lại Sidebar (hiện ra khi sidebar đang đóng) */}
             {!isSidebarOpen && (
                 <button className={styles.openSidebarBtn} onClick={() => setIsSidebarOpen(true)}>
-                    ☰
+                    <FcMenu size={24} />
                 </button>
             )}
             {/* Sidebar */}

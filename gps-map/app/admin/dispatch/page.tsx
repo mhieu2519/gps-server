@@ -5,6 +5,12 @@ import { FiSave } from "react-icons/fi";
 import { FcManager } from "react-icons/fc";
 import { GrTrain } from "react-icons/gr";
 import { BsBoxSeam } from "react-icons/bs";
+import { GiWeight } from "react-icons/gi";
+import { IoPeopleOutline } from "react-icons/io5";
+import { PiEmptyBold } from "react-icons/pi";
+import { LiaOpencart } from "react-icons/lia";
+import { GiBunkBeds } from "react-icons/gi";
+import { PiArmchairLight } from "react-icons/pi";
 
 
 // 1. Mở rộng Interface khớp hoàn toàn với cấu trúc DB mới của cả tàu khách và tàu hàng
@@ -217,9 +223,13 @@ export default function DispatchAdmin() {
                                             <div className="text-[9px] text-emerald-200">{c.current_cargo_weight}/{c.max_cargo_capacity} {c.don_vi}</div>
                                         </div>
                                     ) : c.current_passenger_count > 0 ? (
-                                        `👥 ${c.current_passenger_count} khách`
+                                        <div className="flex items-center gap-1">
+                                            <IoPeopleOutline className="mr-2" /> {c.current_passenger_count} khách
+                                        </div>
                                     ) : (
-                                        "🫙 Toa trống"
+                                        <div className="flex items-center gap-1">
+                                            <PiEmptyBold className="mr-2" /> Toa trống
+                                        </div>
                                     )}
                                 </div>
 
@@ -256,11 +266,15 @@ export default function DispatchAdmin() {
                                     <td className="px-4 py-3 font-mono font-bold">{c.carriage_code}</td>
                                     <td className="px-4 py-3">
                                         {c.type === "HANG_HOA" ? (
-                                            <span className="text-emerald-700 font-medium">🛒 Hàng hóa: {c.ten_hang_hoa}</span>
+                                            <span className=" flex items-center gap-1 text-emerald-700 font-medium"> <LiaOpencart className="mr-2" /> Hàng hóa: {c.ten_hang_hoa}</span>
                                         ) : c.type === "KH_NAM" ? (
-                                            "🛏️ Toa giường nằm"
+                                            <div className="flex items-center gap-1">
+                                                <GiBunkBeds className="mr-2" /> Toa giường nằm
+                                            </div>
                                         ) : (
-                                            "🪑 Toa ghế ngồi"
+                                            <div className="flex items-center gap-1">
+                                                <PiArmchairLight className="mr-2" /> Toa ghế ngồi
+                                            </div>
                                         )}
                                     </td>
                                     <td className="px-4 py-3 text-center font-bold text-gray-700">
@@ -311,7 +325,7 @@ export default function DispatchAdmin() {
                                 </div>
                                 <div className="flex items-center gap-2 text-[11px] text-gray-600 border-t border-dashed pt-1">
                                     <div> <BsBoxSeam className="mr-2" /> <b>{c.ten_hang_hoa}</b></div>
-                                    <div>⚖️ Nặng: {c.current_cargo_weight} / {c.max_cargo_capacity} {c.don_vi}</div>
+                                    <div> <GiWeight className="mr-2" /> Nặng: {c.current_cargo_weight} / {c.max_cargo_capacity} {c.don_vi}</div>
                                 </div>
                                 <button
                                     type="button"
