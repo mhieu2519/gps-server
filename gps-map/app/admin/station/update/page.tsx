@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { BiStation } from "react-icons/bi";
+import { LiaOpencart } from "react-icons/lia";
+import { GiBunkBeds } from "react-icons/gi";
+import { PiArmchairLight } from "react-icons/pi";
+import { FcElectricalSensor } from "react-icons/fc";
 
 interface CarriageUpdate {
     carriage_code: string;
@@ -61,10 +66,10 @@ export default function StationUpdatePage() {
     return (
         <div className="p-6 bg-slate-900 min-h-screen text-slate-100">
             {/* THANH THÔNG TIN GA */}
-            <div className="max-w-4xl mx-auto bg-slate-800 p-4 mb-6 flex justify-between items-center rounded-lg border border-slate-700">
+            <div className="max-w-4xl mx-auto bg-slate-800 p-4 mb-6 flex justify-between items-center ">
                 <div>
-                    <h1 className="text-xl font-bold text-amber-400">🏫 Cổng Cập Nhật Dữ Liệu: {stationName}</h1>
-                    <p className="text-xs text-slate-400 mt-1">Hệ thống tự động đồng bộ hóa theo định vị GPS của đoàn tàu.</p>
+                    <h1 className="flex items-center gap-1 text-xl font-bold text-amber-400"><BiStation className="mr-2 text-xl" /> Cổng Cập Nhật Dữ Liệu: {stationName}</h1>
+                    <p className="text-xs text-slate-400 mt-1">Hệ thống tự động đồng bộ hóa theo định vị GPS của đoàn tàu.( chưa kết nối về database)</p>
                 </div>
 
                 {/* ĐÈN BÁO TRẠNG THÁI GPS TỰ ĐỘNG KHÓA/MỞ CHỨC NĂNG */}
@@ -76,7 +81,7 @@ export default function StationUpdatePage() {
             </div>
 
             {/* THÔNG TIN CHUYẾN TÀU ĐANG DỪNG */}
-            <div className="max-w-4xl mx-auto bg-slate-800 p-5 mb-6 rounded-lg border border-slate-700">
+            <div className="max-w-4xl mx-auto bg-slate-800 p-5 mb-6">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">Thông tin đoàn tàu hiện tại</h2>
                 <div className="grid grid-cols-2 gap-4 text-sm bg-slate-900/50 p-3 rounded">
                     <div><span className="text-slate-500">Mã chuyến đi:</span> <span className="font-mono font-bold text-slate-200">{tripCode}</span></div>
@@ -85,7 +90,7 @@ export default function StationUpdatePage() {
 
                 {/* NÚT GIẢ LẬP ĐỂ TEST BIẾN IS_TRAIN_AT_STATION */}
                 <div className="mt-4 pt-4 border-t border-slate-700/50 flex justify-between items-center">
-                    <span className="text-xs italic text-amber-500/80">💡 Nhấn nút bên cạnh để giả lập hành động tàu chạy đi (Test tính năng ngắt quyền):</span>
+                    <span className="text-xs italic text-amber-500/80"> Test tính năng ngắt quyền:</span>
                     <button
                         type="button"
                         onClick={() => setIsTrainAtStation(!isTrainAtStation)}
@@ -97,7 +102,7 @@ export default function StationUpdatePage() {
             </div>
 
             {/* DANH SÁCH TOA XE CẦN ĐIỀU CHỈNH SỐ LIỆU THỰC TẾ */}
-            <div className="max-w-4xl mx-auto bg-slate-800 p-6 rounded-lg border border-slate-700">
+            <div className="max-w-4xl mx-auto bg-slate-800 p-6 rounded-lg">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">
                     Cập nhật lượng khách & hàng hóa thực tế rời ga
                 </h2>
@@ -120,7 +125,24 @@ export default function StationUpdatePage() {
 
                                     {/* Cột 2: Loại Toa */}
                                     <td className="px-4 py-3 text-gray-500">
-                                        {c.type === "HANG_HOA" ? "🛒 Toa hàng" : c.type === "KH_NAM" ? "🛏️ Toa nằm" : "🪑 Toa ngồi"}
+                                        <span className="flex items-center gap-1">
+                                            {c.type === "HANG_HOA" ? (
+                                                <>
+                                                    <LiaOpencart className="mr-2" />
+                                                    Toa hàng
+                                                </>
+                                            ) : c.type === "KH_NAM" ? (
+                                                <>
+                                                    <GiBunkBeds className="mr-2" />
+                                                    Toa nằm
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <PiArmchairLight className="mr-2" />
+                                                    Toa ngồi
+                                                </>
+                                            )}
+                                        </span>
                                     </td>
 
                                     {/* Cột 3: CHỮA LỖI VALUE ĐỘNG */}
@@ -146,14 +168,15 @@ export default function StationUpdatePage() {
                 </div>
 
                 {/* NÚT ĐỒNG BỘ GỬI BẢN TIN */}
-                <div className="flex justify-end mt-6 pt-4 border-t border-slate-700/50">
+                <div className="flex justify-end mt-6 pt-4 border-slate-700/50">
                     <button
                         type="button"
                         disabled={!isTrainAtStation}
                         onClick={handleSubmitReport}
-                        className="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-700 disabled:text-slate-500 text-slate-950 font-bold py-3 px-6 rounded-lg text-sm transition shadow-md disabled:cursor-not-allowed"
+                        className="flex items-center gap-1 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-700 disabled:text-slate-500 text-slate-950 font-bold py-3 px-6 rounded-lg text-sm transition shadow-md disabled:cursor-not-allowed"
                     >
-                        Gửi Bản Tin Cập Nhật Lên Hệ Thống
+                        <FcElectricalSensor className="mr-2 text-2xl " />
+                        Gửi Bản Tin Cập Nhật
                     </button>
                 </div>
             </div>

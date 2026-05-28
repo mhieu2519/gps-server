@@ -308,7 +308,7 @@ export default function DispatchAdmin() {
 
                 {/* KHO TOA HÀNG DỰ PHÒNG THỰC TẾ (ĐỌC TỪ EMQX LOGS TRONG DB) */}
                 <div className="border rounded-lg bg-white shadow-sm p-3">
-                    <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase border-b pb-2 mb-2 flex items-center ">
+                    <div className="text-xs font-bold text-gray-500 uppercase border-b pb-2 mb-2 flex items-center ">
                         <BsBoxSeam className="mr-2" /> Toa Hàng Mới Trong Kho
                     </div>
                     <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -323,9 +323,17 @@ export default function DispatchAdmin() {
                                         {c.trang_thai_hang}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-2 text-[11px] text-gray-600 border-t border-dashed pt-1">
-                                    <div> <BsBoxSeam className="mr-2" /> <b>{c.ten_hang_hoa}</b></div>
-                                    <div> <GiWeight className="mr-2" /> Nặng: {c.current_cargo_weight} / {c.max_cargo_capacity} {c.don_vi}</div>
+                                <div className="flex items-center gap-3 text-[11px] text-gray-600 border-t border-dashed pt-1">
+                                    <div className="inline-flex items-center gap-1">
+                                        <BsBoxSeam />
+                                        <b>{c.ten_hang_hoa}</b>
+                                    </div>
+                                    <div className="inline-flex items-center gap-1">
+                                        <GiWeight />
+                                        <span>
+                                            Nặng: {c.current_cargo_weight} / {c.max_cargo_capacity} {c.don_vi}
+                                        </span>
+                                    </div>
                                 </div>
                                 <button
                                     type="button"
