@@ -3,22 +3,18 @@
 // lấy dữ liệu từ bảng lich_su_tau
 
 import { NextResponse } from 'next/server';
-import { Pool } from 'pg';
+import { db } from "@/lib/db";
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 10,
-});
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('session_id');
     const selectedDate = searchParams.get('date');
-    const client = await pool.connect();
+
     try {
         // Lấy tọa độ chi tiết của một Session cụ thể (để vẽ map)
         if (sessionId) {
-            const res = await client.query(`
+            const res = await db.query(`
                 SELECT 
                     ma_tau,
                     ST_AsGeoJSON(ST_MakeLine(geom ORDER BY timestamp ASC)) as path_json
@@ -71,13 +67,13 @@ export async function GET(request: Request) {
             LIMIT 200
         `;
 
-        const listRes = await client.query(sqlQuery, queryParams);
+        const listRes = await db.query(sqlQuery, queryParams);
         return NextResponse.json(listRes.rows);
 
     } catch (err: any) {
         console.error("Lỗi API History:", err);
         return NextResponse.json({ error: err.message }, { status: 500 });
     } finally {
-        client.release();
+        // client.release();
     }
 }
