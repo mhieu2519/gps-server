@@ -34,7 +34,12 @@ export default function Header() {
             <header className="fixed top-0 left-0 w-full h-16 bg-white/90 backdrop-blur-md z-[1000] border-b shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     {/* Logo */}
-                    <div className="font-bold text-xl text-cyan-700 tracking-tight">GPS Tracking</div>
+                    <Link
+                        href="/"
+                        className="font-bold text-xl text-cyan-700 tracking-tight hover:text-cyan-500 transition"
+                    >
+                        GPS Tracking
+                    </Link>
 
                     {/* Navigation chính (Đã bỏ Điều phối toa) */}
                     <nav className="hidden md:flex gap-8 text-gray-600 font-medium">
