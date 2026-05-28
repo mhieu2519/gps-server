@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { FiSave } from "react-icons/fi";
+import { FcManager } from "react-icons/fc";
+import { GrTrain } from "react-icons/gr";
+import { BsBoxSeam } from "react-icons/bs";
+
 
 // 1. Mở rộng Interface khớp hoàn toàn với cấu trúc DB mới của cả tàu khách và tàu hàng
 interface Carriage {
@@ -135,14 +140,15 @@ export default function DispatchAdmin() {
             {/* THANH ĐIỀU HƯỚNG TRÊN CÙNG */}
             <div className="flex justify-between items-center border-b pb-4 mb-6">
                 <div>
-                    <h1 className="text-xl font-bold text-gray-900">🎛️ Quản Lý Thiết Lập Đoàn Tàu</h1>
+                    <h1 className="text-xl font-bold text-gray-900"> <FcManager /> <span className="ml-2">  Quản Lý Lập Tàu</span></h1>
                     <p className="text-xs text-gray-500 mt-0.5">Kiểm tra sơ đồ khách từ hệ thống vé và phân phối thêm toa hàng hóa.</p>
                 </div>
                 <button
                     onClick={handleSaveLayout}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded text-sm transition shadow-sm"
+                    className="flex items-center bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-1 px-4 rounded text-sm transition shadow-sm"
                 >
-                    💾 Lưu Cấu Hình Lập Tàu
+                    <FiSave className="mr-2" />
+                    Lưu Cấu Hình
                 </button>
             </div>
 
@@ -172,12 +178,12 @@ export default function DispatchAdmin() {
 
             {/* SƠ ĐỒ ĐOÀN TÀU VẬT LÝ TRỰC QUAN */}
             <div className="mb-6">
-                <h2 className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Thứ tự các toa trên ray (Thời gian thực)</h2>
-                <div className="flex items-center gap-2 p-4 border rounded-xl bg-gray-900 overflow-x-auto min-h-[130px]">
+                <h2 className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Thứ tự các toa trên ray</h2>
+                <div className="flex items-center gap-2 p- bg-gray-900 overflow-x-auto min-h-[130px]">
 
                     {/* Đầu máy cố định */}
                     <div className="w-32 h-24 bg-amber-500 text-white rounded-lg flex flex-col justify-between p-2 flex-shrink-0 text-xs border-b-4 border-amber-700">
-                        <span className="font-black">🚂 ĐẦU MÁY</span>
+                        <span className="font-roboto font-bold text-[10px] ml-2 flex items-center gap-1"><GrTrain className="text-lg mr-2 " /> ĐẦU MÁY</span>
                         <span className="font-mono text-[10px] bg-black/20 p-0.5 rounded truncate">{trainHead}</span>
                         <span className="text-[9px] text-amber-200">VỊ TRÍ: #0</span>
                     </div>
@@ -207,7 +213,7 @@ export default function DispatchAdmin() {
                                 <div className="text-[10px] leading-tight text-gray-100">
                                     {c.type === "HANG_HOA" ? (
                                         <div>
-                                            <div className="font-medium truncate">📦 {c.ten_hang_hoa}</div>
+                                            <div className="font-medium truncate flex items-center gap-1"><BsBoxSeam className="mr-2" /> {c.ten_hang_hoa}</div>
                                             <div className="text-[9px] text-emerald-200">{c.current_cargo_weight}/{c.max_cargo_capacity} {c.don_vi}</div>
                                         </div>
                                     ) : c.current_passenger_count > 0 ? (
@@ -288,7 +294,9 @@ export default function DispatchAdmin() {
 
                 {/* KHO TOA HÀNG DỰ PHÒNG THỰC TẾ (ĐỌC TỪ EMQX LOGS TRONG DB) */}
                 <div className="border rounded-lg bg-white shadow-sm p-3">
-                    <div className="text-xs font-bold text-gray-500 uppercase border-b pb-2 mb-2">📦 Toa Hàng Mới Trong Kho</div>
+                    <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase border-b pb-2 mb-2 flex items-center ">
+                        <BsBoxSeam className="mr-2" /> Toa Hàng Mới Trong Kho
+                    </div>
                     <div className="space-y-2 max-h-[400px] overflow-y-auto">
                         {availableCargoCarriages.map((c) => (
                             <div key={c.id} className="p-2 border rounded bg-gray-50 flex flex-col justify-between gap-2 text-xs">
@@ -301,8 +309,8 @@ export default function DispatchAdmin() {
                                         {c.trang_thai_hang}
                                     </span>
                                 </div>
-                                <div className="text-[11px] text-gray-600 border-t border-dashed pt-1">
-                                    <div>📦 <b>{c.ten_hang_hoa}</b></div>
+                                <div className="flex items-center gap-2 text-[11px] text-gray-600 border-t border-dashed pt-1">
+                                    <div> <BsBoxSeam className="mr-2" /> <b>{c.ten_hang_hoa}</b></div>
                                     <div>⚖️ Nặng: {c.current_cargo_weight} / {c.max_cargo_capacity} {c.don_vi}</div>
                                 </div>
                                 <button
