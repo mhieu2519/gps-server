@@ -10,7 +10,7 @@ import { FaChartLine } from "react-icons/fa";
 import { FaTrain } from "react-icons/fa6";
 import { GiCaptainHatProfile } from "react-icons/gi";
 import { FcBullish } from "react-icons/fc";
-
+import { CgPushUp } from "react-icons/cg";
 
 export default function Header() {
     const { data: session, status } = useSession();
@@ -109,6 +109,16 @@ export default function Header() {
                                                             Điều phối toa
                                                         </span>
 
+                                                    </Link>
+                                                    <Link
+                                                        href="/admin/station/update"
+                                                        onClick={() => setIsDropdownOpen(false)}
+                                                        className="flex items-center px-4 py-2.5 text-sm text-cyan-600 bg-cyan-50/50 hover:bg-cyan-50 font-bold transition"
+                                                    >
+                                                        <CgPushUp />
+                                                        <span className="ml-2">
+                                                            Cập nhật tại ga
+                                                        </span>
                                                     </Link>
                                                 </>
                                             )}

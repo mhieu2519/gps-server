@@ -1,3 +1,4 @@
+import { AiOutlineLoading } from "react-icons/ai";
 export default function DashboardPage() {
     return (
         <div className="p-6 text-white">
@@ -5,8 +6,9 @@ export default function DashboardPage() {
                 Dashboard
             </h1>
 
-            <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-700">
-                <p>Trang dashboard đang được phát triển...</p>
+            <div className="flex items-center gap-2 text-white">
+                <AiOutlineLoading className="animate-spin text-xl" />
+                <span>Trang đang chờ được phát triển...</span>
             </div>
         </div>
     );
