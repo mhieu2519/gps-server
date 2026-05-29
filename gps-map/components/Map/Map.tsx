@@ -334,8 +334,20 @@ export default function MapDashboard() {
                         {/*   <LayersControl.BaseLayer checked name="Bản đồ đường bộ">
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         </LayersControl.BaseLayer> */}
-                        <LayersControl.Overlay checked name="Bản đồ OSM">
-                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+
+                        <LayersControl.Overlay name="Bản đồ Google Maps (Road)">
+                            <TileLayer
+                                url="https://mt1.google.com/vt/lyrs=h&x={x}&y={y}&z={z}"
+                                attribution='&copy; Google Maps'
+                            />
+                        </LayersControl.Overlay>
+                        <LayersControl.Overlay checked name="Bản đồ Google Maps">
+                            <TileLayer
+                                url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                                attribution='&copy; Google Maps'
+                            />
+
                         </LayersControl.Overlay>
                         <LayersControl.Overlay name="Mạng lưới đường sắt (OpenRail)">
                             <TileLayer
@@ -354,7 +366,9 @@ export default function MapDashboard() {
                                 zIndex={10}
                             />
                         </LayersControl.Overlay>
-
+                        <LayersControl.Overlay name="Bản đồ OpenStreetMap(có vấn đề)">
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        </LayersControl.Overlay>
                         {/* Lớp hiển thị Lịch sử hành trình */}
                         <LayersControl.Overlay checked name="Hành trình xem lại">
                             <LayerGroup>
