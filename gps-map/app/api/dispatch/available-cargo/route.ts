@@ -1,4 +1,4 @@
-// File: gps-server/gps-map/app/api/dispatch/available-cargo/route.ts
+// gps-server/gps-map/app/api/dispatch/available-cargo/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
