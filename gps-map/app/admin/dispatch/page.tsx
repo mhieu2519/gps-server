@@ -84,7 +84,7 @@ export default function DispatchAdmin() {
         async function fetchInitialData() {
             try {
                 // Gọi API lấy danh sách chuyến đi thực tế trong bảng lịch trình
-                const res = await fetch("/api/dispatch/trips");
+                const res = await fetch("/api/dispatch/schedule/trips");
                 const tripsData: TripItem[] = await res.json();
 
                 if (tripsData && tripsData.length > 0) {

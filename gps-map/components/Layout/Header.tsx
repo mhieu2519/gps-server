@@ -11,6 +11,7 @@ import { FaTrain } from "react-icons/fa6";
 import { GiCaptainHatProfile } from "react-icons/gi";
 import { FcBullish } from "react-icons/fc";
 import { CgPushUp } from "react-icons/cg";
+import { FcCalendar } from "react-icons/fc";
 
 export default function Header() {
     const { data: session, status } = useSession();
@@ -123,6 +124,16 @@ export default function Header() {
                                                         <CgPushUp />
                                                         <span className="ml-2">
                                                             Cập nhật tại ga
+                                                        </span>
+                                                    </Link>
+                                                    <Link
+                                                        href="/admin/dispatch/schedule"
+                                                        onClick={() => setIsDropdownOpen(false)}
+                                                        className="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition"
+                                                    >
+                                                        <FcCalendar />
+                                                        <span className="ml-2">
+                                                            Lịch chạy tàu
                                                         </span>
                                                     </Link>
                                                 </>
