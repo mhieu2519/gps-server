@@ -15,8 +15,6 @@ import { PiArmchairLight } from "react-icons/pi";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { FcDataConfiguration } from "react-icons/fc";
 
-
-
 // Interface cấu trúc Toa xe
 interface Carriage {
     id: number;
@@ -46,13 +44,24 @@ interface StationItem {
     ten_ga: string;
 }
 
-export default function DispatchAdmin() {
-    const [selectedTrip, setSelectedTrip] = useState("SE1_2026_05_23");
-    const [trainHead, setTrainHead] = useState("D19E-941");
+// 🆕 Interface cho Chuyến đi thực tế lấy từ bảng lịch trình
+interface TripItem {
+    ma_chuyen_di: string;
+    ma_tau: string;
+    ngay_chay: string;
+    ma_dau_may: string;
+    ma_lo_trinh: string | null;
+    trang_thai: string;
+}
 
+export default function DispatchAdmin() {
     // ==========================================
-    // 1. CÁC STATE MỚI QUẢN LÝ LỘ TRÌNH & GA
+    // 1. CÁC STATE QUẢN LÝ DỮ LIỆU ĐỘNG TỪ DB
     // ==========================================
+    const [trips, setTrips] = useState<TripItem[]>([]); // Danh sách các chuyến đi từ bảng lịch trình
+    const [selectedTrip, setSelectedTrip] = useState(""); // Mã chuyến đi đang chọn
+    const [trainHead, setTrainHead] = useState(""); // Đầu máy tự động đồng bộ theo chuyến đi
+
     const [availableRoutes, setAvailableRoutes] = useState<RouteItem[]>([]); // Đọc ngược từ bảng lo_trinh
     const [selectedRoute, setSelectedRoute] = useState(""); // Mã lộ trình gán cho chuyến đi hiện tại
     const [stations, setStations] = useState<StationItem[]>([]); // Danh mục ga để thiết kế lộ trình
@@ -69,19 +78,53 @@ export default function DispatchAdmin() {
     const [isLoading, setIsLoading] = useState(true);
 
     // ==========================================
-    // 2. CẬP NHẬT EFFECT FETCH DỮ LIỆU ĐỒNG BỘ
+    // 2. EFFECT 1: TẢI DANH SÁCH CHUYẾN ĐI BAN ĐẦU
     // ==========================================
     useEffect(() => {
+        async function fetchInitialData() {
+            try {
+                // Gọi API lấy danh sách chuyến đi thực tế trong bảng lịch trình
+                const res = await fetch("/api/dispatch/trips");
+                const tripsData: TripItem[] = await res.json();
+
+                if (tripsData && tripsData.length > 0) {
+                    setTrips(tripsData);
+                    // Chọn mặc định chuyến đi đầu tiên trong danh sách công việc
+                    setSelectedTrip(tripsData[0].ma_chuyen_di);
+                } else {
+                    setIsLoading(false); // Nếu hoàn toàn không có chuyến đi nào
+                }
+            } catch (error) {
+                console.error("❌ Lỗi tải danh sách chuyến đi thực tế:", error);
+                setIsLoading(false);
+            }
+        }
+        fetchInitialData();
+    }, []);
+
+    // ==========================================
+    // 3. EFFECT 2: ĐỒNG BỘ DỮ LIỆU KHI CHỌN CHUYẾN ĐI
+    // ==========================================
+    useEffect(() => {
+        if (!selectedTrip) return;
+
         async function fetchTrainData() {
             try {
                 setIsLoading(true);
 
-                // Fetch song song: Dữ liệu tàu khách + dữ liệu toa hàng rảnh + Danh mục lộ trình + Danh mục ga
+                // Tìm thông tin chuyến đi đang chọn trong danh sách chuyến đi hiện tại để lấy Đầu Máy mặc định trước
+                const currentTripInfo = trips.find(t => t.ma_chuyen_di === selectedTrip);
+                if (currentTripInfo) {
+                    setTrainHead(currentTripInfo.ma_dau_may || "");
+                    setSelectedRoute(currentTripInfo.ma_lo_trinh || "");
+                }
+
+                // Fetch dữ liệu liên quan từ DB
                 const [passengerRes, cargoRes, routesRes, stationsRes] = await Promise.all([
                     fetch(`/api/dispatch/passenger?trip=${selectedTrip}`),
                     fetch(`/api/dispatch/available-cargo`),
-                    fetch(`/api/dispatch/routes`),   // Thêm API lấy danh sách lộ trình
-                    fetch(`/api/dispatch/stations`)  // Thêm API lấy danh sách ga
+                    fetch(`/api/dispatch/routes`),
+                    fetch(`/api/dispatch/stations`)
                 ]);
 
                 const passengerData = await passengerRes.json();
@@ -93,15 +136,16 @@ export default function DispatchAdmin() {
                 setAvailableRoutes(routesData || []);
                 setStations(stationsData || []);
 
-                // Kiểm tra xem chuyến đi này hiện tại đã được gán mã lộ trình nào chưa (Backend trả về kèm theo passengerData)
+                // Nếu trong DB của chuyến đi này đã có gán sẵn lộ trình, cập nhật lại cho chuẩn xác nhất
                 if (passengerData.ma_lo_trinh) {
                     setSelectedRoute(passengerData.ma_lo_trinh);
+                } else if (currentTripInfo?.ma_lo_trinh) {
+                    setSelectedRoute(currentTripInfo.ma_lo_trinh);
                 } else {
                     setSelectedRoute("");
                 }
 
                 // Map dữ liệu từ bảng du_lieu_dat_ve sang cấu trúc Frontend
-                // Lưu ý: Trường hợp backend bọc dữ liệu trong thuộc tính .carriages, lấy đúng cấu trúc đó
                 const rawCarriages = passengerData.carriages ? passengerData.carriages : passengerData;
                 const mappedPassengers: Carriage[] = (rawCarriages || []).map((item: any) => ({
                     id: item.id,
@@ -109,7 +153,7 @@ export default function DispatchAdmin() {
                     type: item.loai_toa,
                     current_passenger_count: item.so_luong_thuc_te || 0,
                     max_capacity: item.suc_chua_toi_da || 0,
-                    isActive: item.is_active,
+                    isActive: item.is_active !== undefined ? item.is_active : true,
                 }));
 
                 // Map dữ liệu từ bảng du_lieu_tau_hang sang cấu trúc Frontend
@@ -137,11 +181,11 @@ export default function DispatchAdmin() {
         }
 
         fetchTrainData();
-    }, [selectedTrip]);
+    }, [selectedTrip, trips]);
 
     // Hàm gọi tải lại riêng danh mục lộ trình sau khi lưu mới
     const refreshRoutes = async () => {
-        const res = await fetch(`/api/routes`);
+        const res = await fetch(`/api/dispatch/routes`);
         const data = await res.json();
         setAvailableRoutes(data || []);
     };
@@ -176,14 +220,17 @@ export default function DispatchAdmin() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     selectedTrip,
-                    trainHead,
-                    ma_lo_trinh: selectedRoute, // GỬI THÊM: Mã lộ trình được chọn lên DB để gán vào chuyến đi
+                    trainHead, // Lưu mã đầu máy (có thể đã chỉnh sửa thủ công nếu đổi đầu máy đứt xích)
+                    ma_lo_trinh: selectedRoute,
                     layout: trainLayout
                 })
             });
 
             if (response.ok) {
-                alert(`💾 [DATABASE] Đã lưu cấu hình & gán lộ trình thành công cho đoàn tàu ${selectedTrip}!`);
+                alert(`💾 [DATABASE] Đã cập nhật đầu máy [${trainHead}] & gán lộ trình thành công cho chuyến ${selectedTrip}!`);
+
+                // Cập nhật lại state local danh sách trips để đồng bộ giao diện ngay lập tức
+                setTrips(prev => prev.map(t => t.ma_chuyen_di === selectedTrip ? { ...t, ma_dau_may: trainHead, ma_lo_trinh: selectedRoute } : t));
             } else {
                 alert("❌ Lỗi khi lưu cấu hình lập tàu.");
             }
@@ -192,9 +239,9 @@ export default function DispatchAdmin() {
         }
     };
 
-    // Nghiệp vụ 5: Logic Kéo thả / Chọn ga tạo lộ trình mới
+    // Nghiệp vụ 5: Logic Chọn ga tạo lộ trình mới
     const handleAddStationToNewRoute = (maGa: string) => {
-        if (selectedStations.includes(maGa)) return; // Tránh trùng lặp ga
+        if (selectedStations.includes(maGa)) return;
         setSelectedStations([...selectedStations, maGa]);
     };
 
@@ -215,7 +262,7 @@ export default function DispatchAdmin() {
                 body: JSON.stringify({
                     ma_lo_trinh: newRouteCode,
                     ten_lo_trinh: newRouteName,
-                    danh_sach_ga: selectedStations // Gửi mảng mã ga lên postgres
+                    danh_sach_ga: selectedStations
                 })
             });
 
@@ -224,7 +271,7 @@ export default function DispatchAdmin() {
                 setNewRouteCode("");
                 setNewRouteName("");
                 setSelectedStations([]);
-                refreshRoutes(); // Cập nhật ngược lại danh sách trên thanh điều phối chuyến đi
+                refreshRoutes();
             } else {
                 alert("❌ Có lỗi xảy ra khi lưu lộ trình.");
             }
@@ -233,8 +280,8 @@ export default function DispatchAdmin() {
         }
     };
 
-    if (isLoading) {
-        return <div className="p-6 text-center text-sm font-medium text-gray-500">⏳ Đang đồng bộ dữ liệu thực tế từ Database...</div>;
+    if (isLoading && trips.length === 0) {
+        return <div className="p-6 text-center text-sm font-medium text-gray-500">⏳ Đang đọc danh sách lịch trình chuyến đi thực tế từ Database...</div>;
     }
 
     return (
@@ -243,8 +290,8 @@ export default function DispatchAdmin() {
             {/* THANH ĐIỀU HƯỚNG TRÊN CÙNG */}
             <div className="flex justify-between items-center border-b pb-4 mb-6">
                 <div>
-                    <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2"> <FcManager /> <span>Quản Lý Lập Tàu</span></h1>
-                    <p className="text-xs text-gray-500 mt-0.5">Kiểm tra sơ đồ khách từ hệ thống vé và phân phối thêm toa hàng hóa.</p>
+                    <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2"> <FcManager /> <span>Quản Lý Lập Tàu Kỹ Thuật</span></h1>
+                    <p className="text-xs text-gray-500 mt-0.5">Hệ thống đồng bộ lịch chạy thực tế, phân phối đầu máy GPS và móc nối toa hàng.</p>
                 </div>
                 <button
                     onClick={handleSaveLayout}
@@ -257,22 +304,30 @@ export default function DispatchAdmin() {
 
             {/* THÔNG TIN CHUYẾN ĐI, LỘ TRÌNH VÀ ĐẦU MÁY */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                {/* 1. Chọn Chuyến đi */}
+
+                {/* 1. CHỌN CHUYẾN ĐI ĐỘNG (Đọc từ bảng lịch trình thực tế) */}
                 <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Mã Chuyến Đi</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Mã Chuyến Đi (Từ Lịch Trình)</label>
                     <select
-                        className="border border-gray-300 rounded p-1.5 text-sm bg-white font-medium w-full focus:outline-none"
+                        className="border border-gray-300 rounded p-1.5 text-sm bg-white font-semibold w-full focus:outline-none text-gray-900"
                         value={selectedTrip}
                         onChange={(e) => setSelectedTrip(e.target.value)}
                     >
-                        <option value="SE1_2026_05_23">Tàu SE1 (Hà Nội - Sài Gòn)</option>
-                        <option value="HP2_2026_05_23">Tàu HP2 (Hải Phòng - Hà Nội)</option>
+                        {trips.length === 0 ? (
+                            <option value="">-- Trống (Hãy tạo lịch chạy trước) --</option>
+                        ) : (
+                            trips.map((trip) => (
+                                <option key={trip.ma_chuyen_di} value={trip.ma_chuyen_di}>
+                                    🚂 {trip.ma_tau} ({trip.ngay_chay}) - {trip.ma_chuyen_di}
+                                </option>
+                            ))
+                        )}
                     </select>
                 </div>
 
-                {/* 2. CHỌN LỘ TRÌNH (Đọc dữ liệu ngược về từ bảng lộ trình và chọn để gắn mã vào chuyến đi khi lưu) */}
+                {/* 2. CHỌN LỘ TRÌNH */}
                 <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Gán Lộ Trình Cho Chuyến Đi</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Gán Lộ Trình Hành Trình</label>
                     <select
                         className="border border-gray-300 rounded p-1.5 text-sm bg-white font-semibold text-cyan-800 w-full focus:outline-none"
                         value={selectedRoute}
@@ -287,32 +342,35 @@ export default function DispatchAdmin() {
                     </select>
                 </div>
 
-                {/* 3. Đầu máy định vị GPS */}
+                {/* 3. ĐẦU MÁY (Tự động cập nhật từ chuyến đi) */}
                 <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Đầu Máy (Gắn định vị GPS)</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Đầu Máy Cấp Phát (Định vị GPS)</label>
                     <input
                         type="text"
-                        className="border border-gray-300 rounded p-1.5 text-sm font-mono w-full bg-white"
+                        className="border border-gray-300 rounded p-1.5 text-sm font-mono w-full bg-white text-amber-600 font-bold"
                         value={trainHead}
                         onChange={(e) => setTrainHead(e.target.value)}
+                        placeholder="Nhập mã đầu máy (Ví dụ: D19E-941)"
                     />
                 </div>
             </div>
 
             {/* SƠ ĐỒ ĐOÀN TÀU VẬT LÝ TRỰC QUAN */}
             <div className="mb-6">
-                <h2 className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Thứ tự các toa trên ray</h2>
+                <h2 className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Thứ tự các toa trên ray thực tế</h2>
                 <div className="flex items-center gap-2 p-2 bg-gray-900 overflow-x-auto min-h-[130px] rounded-lg">
 
-                    {/* Đầu máy cố định */}
+                    {/* Đầu máy động */}
                     <div className="w-32 h-24 bg-amber-500 text-white rounded-lg flex flex-col justify-between p-2 flex-shrink-0 text-xs border-b-4 border-amber-700">
                         <span className="font-bold text-[10px] ml-2 flex items-center gap-1"><GrTrain className="text-lg mr-2 " /> ĐẦU MÁY</span>
-                        <span className="font-mono text-[10px] bg-black/20 p-0.5 rounded truncate">{trainHead}</span>
+                        <span className="font-mono text-[10px] bg-black/20 p-0.5 rounded truncate">{trainHead || "CHƯA CÓ"}</span>
                         <span className="text-[9px] text-amber-200">VỊ TRÍ: #0</span>
                     </div>
 
                     {/* Danh sách các toa xe */}
-                    {trainLayout.map((c, index) => (
+                    {isLoading ? (
+                        <div className="text-gray-400 text-xs my-auto pl-4">⏳ Đang kết nối sơ đồ toa...</div>
+                    ) : trainLayout.map((c, index) => (
                         <div key={`${c.carriage_code}-${index}`} className="flex items-center flex-shrink-0">
                             <div className="w-4 h-1 bg-gray-600"></div>
 
@@ -418,11 +476,16 @@ export default function DispatchAdmin() {
                                     </td>
                                 </tr>
                             ))}
+                            {!isLoading && trainLayout.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} className="text-center py-6 text-gray-400 italic">Chuyến đi này chưa được thiết lập bất kỳ toa tàu nào.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
 
-                {/* KHO TOA HÀNG DỰ PHÒNG THỰC TẾ (ĐỌC TỪ EMQX LOGS TRONG DB) */}
+                {/* KHO TOA HÀNG DỰ PHÒNG THỰC TẾ */}
                 <div className="border rounded-lg bg-white shadow-sm p-3">
                     <div className="text-xs font-bold text-gray-500 uppercase border-b pb-2 mb-2 flex items-center ">
                         <BsBoxSeam className="mr-2" /> Toa Hàng Mới Trong Kho
@@ -465,9 +528,7 @@ export default function DispatchAdmin() {
                 </div>
             </div>
 
-            {/* ======================================================= */}
-            {/* 4. THÊM MỚI TOÀN BỘ KHU VỰC THIẾT KẾ LỘ TRÌNH  */}
-            {/* ======================================================= */}
+            {/* KHU VỰC THIẾT KẾ LỘ TRÌNH */}
             <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                 <div className="border-b pb-2 mb-4">
                     <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
@@ -501,7 +562,6 @@ export default function DispatchAdmin() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Trái: Danh sách ga từ bảng `ga` */}
                     <div>
                         <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Danh Sách Ga Sẵn Có (Click để thêm)</p>
                         <div className="border border-gray-200 rounded-lg h-44 overflow-y-auto p-2.5 bg-gray-50 flex flex-wrap gap-1.5 content-start">
@@ -510,7 +570,7 @@ export default function DispatchAdmin() {
                                     key={ga.ma_ga}
                                     type="button"
                                     onClick={() => handleAddStationToNewRoute(ga.ma_ga)}
-                                    className="flex items-center bg-white hover:bg-cyan-50 hover:border-cyan-400 border border-gray-300 rounded px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition flex items-center"
+                                    className="flex items-center bg-white hover:bg-cyan-50 hover:border-cyan-400 border border-gray-300 rounded px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition"
                                 >
                                     <IoMdAddCircleOutline className="mr-1" />
                                     {ga.ten_ga} ({ga.ma_ga})
@@ -520,7 +580,6 @@ export default function DispatchAdmin() {
                         </div>
                     </div>
 
-                    {/* Phải: Thứ tự ga được chọn tạo thành mảng lộ trình */}
                     <div>
                         <p className="text-[11px] font-bold text-cyan-600 uppercase tracking-wider mb-2">Hành Trình Ga Qua Đi (Theo Thứ Tự Tuyến Đường)</p>
                         <div className="border border-cyan-100 rounded-lg h-44 overflow-y-auto p-2 bg-cyan-50/20 flex flex-col gap-1.5">
@@ -550,14 +609,13 @@ export default function DispatchAdmin() {
                     <button
                         type="button"
                         onClick={handleSaveNewRoute}
-                        className="flex items-center bg-gray-900 hover:bg-gray-800 text-black text-xs font-bold px-4 py-2 rounded shadow-sm transition"
+                        className="flex items-center bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold px-4 py-2 rounded shadow-sm transition"
                     >
                         <FiSave className="mr-2" />
                         Lưu Lộ Trình
                     </button>
                 </div>
             </div>
-            {/* HẾT KHU VỰC LỘ TRÌNH */}
 
         </div>
     );
