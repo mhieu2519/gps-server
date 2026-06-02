@@ -155,7 +155,7 @@ export default function SchedulePage() {
             {/* Khối Danh Sách Lịch Trình Hiện Có */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="flex items-center p-4 border-b border-gray-200 bg-gray-100 font-semibold text-gray-700">
-                    <FcSurvey className="text-3xl" />
+                    <FcSurvey className=" mr-2 text-3xl" />
                     Danh Sách Các Chuyến Đi Đã Thiết Lập
                 </div>
                 <div className="overflow-x-auto">
@@ -173,7 +173,9 @@ export default function SchedulePage() {
                         <tbody>
                             {trips.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="p-6 text-center text-gray-400 italic">Hiện tại chưa có lịch chạy tàu nào được thiết lập.</td>
+                                    <td colSpan={6} className="p-6 text-center text-gray-400 italic">
+                                        Hiện tại chưa có lịch chạy tàu nào được thiết lập.
+                                    </td>
                                 </tr>
                             ) : (
                                 trips?.map((trip) => (
@@ -181,26 +183,41 @@ export default function SchedulePage() {
                                         <td className="p-3 font-mono font-bold text-blue-600">{trip.ma_chuyen_di}</td>
                                         <td className="p-3 font-medium text-gray-700">{trip.ma_tau}</td>
                                         <td className="p-3 text-gray-600">{new Date(trip.ngay_chay).toLocaleDateString('vi-VN')}</td>
-                                        <td> {trip.ma_dau_may || <span className="flex items-center gap-1 text-amber-500"><FcHighPriority /> Chưa gán</span>}</td>
-                                        <td> {trip.ma_lo_trinh || <span className="flex items-center gap-1 text-amber-500"><FcHighPriority /> Chưa gán</span>}</td>
-                                        <td className="p-3 text-center">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${trip.trang_thai === 'CHO_LAP_TAU' ? 'bg-amber-100 text-amber-700' :
-                                                trip.trang_thai === 'SAN_SANG' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-                                                }`}>
-                                                {trip.trang_thai === 'CHO_LAP_TAU' ? '⏳ Chờ lập tàu' : '✅ Sẵn sàng'}
-                                            </span>
-                                            <button
-                                                onClick={() => handleDelete(trip.ma_chuyen_di)}
-                                                className="flex items-center text-center gap-1 ml-2 text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 hover:border-red-500 rounded px-2 py-1 transition"
-                                            >
-                                                <FcEmptyTrash className="mr-1" />
-                                                Xóa
-                                            </button>
+                                        <td className="p-3 text-gray-600">
+                                            {trip.ma_dau_may || (
+                                                <span className="flex items-center gap-1 text-amber-500"><FcHighPriority /> Chưa gán</span>
+                                            )}
+                                        </td>
+                                        <td className="p-3 text-gray-600">
+                                            {trip.ma_lo_trinh || (
+                                                <span className="flex items-center gap-1 text-amber-500"><FcHighPriority /> Chưa gán</span>
+                                            )}
+                                        </td>
+                                        <td className="p-3">
+                                            {/* Cực kỳ chuẩn chỉnh, bọc div flex để nút và trạng thái thẳng hàng */}
+                                            <div className="flex items-center justify-center gap-3">
+                                                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${trip.trang_thai === 'CHO_LAP_TAU' ? 'bg-amber-100 text-amber-700' :
+                                                    trip.trang_thai === 'SAN_SANG' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                                    }`}>
+                                                    {trip.trang_thai === 'CHO_LAP_TAU' ? '⏳ Chờ lập tàu' : '✅ Sẵn sàng'}
+                                                </span>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(trip.ma_chuyen_di)}
+                                                    className="flex items-center justify-center gap-1 text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 hover:border-red-500 rounded px-2.5 py-1 bg-white hover:bg-red-50 transition shadow-sm whitespace-nowrap"
+                                                >
+                                                    <FcEmptyTrash className="text-sm" />
+                                                    <span>Xóa</span>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
                             )}
                         </tbody>
+
+
                     </table>
                 </div>
             </div>
