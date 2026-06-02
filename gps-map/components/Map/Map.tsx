@@ -10,7 +10,8 @@ import "leaflet-rotatedmarker";
 
 import { DeviceStatus, HistoryData } from "./types";
 import styles from "./Map.module.css";
-
+import LoginModal from "../Layout/LoginModal";
+import { useSession } from "next-auth/react";
 import { GestureHandling } from 'leaflet-gesture-handling';
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
 import { io } from "socket.io-client";
@@ -184,6 +185,11 @@ export default function MapDashboard() {
     const [activeTab, setActiveTab] = useState<'live' | 'history'>('live');
     const sidebarRef = useRef<HTMLDivElement>(null);
     const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]); // Mặc định là hôm nay
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { status } = useSession();
+    const isLoggedIn = status === "authenticated";
+
     // gọi lại mỗi khi filterDate thay đổi
     useEffect(() => {
         const fetchSessions = async () => {
@@ -299,129 +305,136 @@ export default function MapDashboard() {
 
     return (
         <div className={styles.container}>
+            {/* thêm kiêm rtra điều kienj đăng nhập trước khi hiện side bản */}
 
-            {/* Nút mở lại Sidebar (hiện ra khi sidebar đang đóng) */}
-            {!isSidebarOpen && (
-                <button className={styles.openSidebarBtn} onClick={() => setIsSidebarOpen(true)}>
-                    <FcMenu size={24} />
-                </button>
-            )}
-            {/* Sidebar */}
-            <div
-                ref={sidebarRef}
-                className={`${styles.sidebar} ${!isSidebarOpen ? styles.sidebarHidden : ""}`}>
-
-                <button className={styles.closeSidebarBtn} onClick={() => setIsSidebarOpen(false)}>
-                    ✕
-                </button>
-
-                <div className={styles.sidebarHeader}>
-                    <h2>Hệ thống Đường Sắt</h2>
-                </div>
-                {/* Thanh điều hướng Tab */}
-                <div className={styles.tabHeaders}>
-                    <button
-                        className={`${styles.tabBtn} ${activeTab === 'live' ? styles.tabActive : ""}`}
-                        onClick={() => setActiveTab('live')}
-                    >
-                        📡 Trực tuyến
-                    </button>
-                    <button
-                        className={`${styles.tabBtn} ${activeTab === 'history' ? styles.tabActive : ""}`}
-                        onClick={() => setActiveTab('history')}
-                    >
-                        🕑 Lịch sử
-                    </button>
-                </div>
-                <div className={styles.sidebarContent}>
-                    {/* Danh sách tàu trực tuyến */}
-                    {activeTab === 'live' && (
-                        <div className={styles.sidebarSection}>
-                            <h3 className={styles.sectionTitle}>📡 Đang hoạt động ({Object.keys(devices).length})</h3>
-                            <div className={styles.deviceList}>
-                                {Object.keys(devices).length > 0 ? (
-
-                                    Object.keys(devices).map((id) => (
-                                        <div
-                                            key={id}
-                                            className={styles.deviceItem}
-                                            onClick={() => {
-                                                setSelectedDevicePos([devices[id].lat, devices[id].lng]);
-                                                setMapBounds(null); // Ưu tiên FlyTo vị trí tàu
-                                            }}
-                                        >
-                                            <div className={styles.deviceName}>🚅 {id}</div>
-                                            <div className={styles.deviceInfo}>
-                                                <span>🚀Tốc độ: <b>{devices[id].speed}</b> km/h</span>
-                                                <p><span>🔋Pin: {devices[id].battery}%</span> </p>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (<p className={styles.emptyText}>Không có tàu nào trực tuyến</p>
-
-                                )}
-                            </div>
-                        </div>
+            {isLoggedIn && (
+                <>
+                    {/* Nút mở lại Sidebar (hiện ra khi sidebar đang đóng) */}
+                    {!isSidebarOpen && (
+                        <button className={styles.openSidebarBtn} onClick={() => setIsSidebarOpen(true)}>
+                            <FcMenu size={24} />
+                        </button>
                     )}
+                    {/* Sidebar */}
+                    <div
+                        ref={sidebarRef}
+                        className={`${styles.sidebar} ${!isSidebarOpen ? styles.sidebarHidden : ""}`}>
 
-                    {/* Xem lại hành trình */}
+                        <button className={styles.closeSidebarBtn} onClick={() => setIsSidebarOpen(false)}>
+                            ✕
+                        </button>
 
-                    {activeTab === 'history' && (
-                        <div className={styles.sidebarSection}>
-                            <h3 className={styles.sectionTitle}>
-                                🚞 Danh sách chuyến đi</h3>
-                            <div className={styles.filterContainer}>
-                                {/*<label>Chọn ngày xem:</label>*/}
-                                <input
-                                    type="date"
-                                    value={filterDate}
-                                    onChange={(e) => setFilterDate(e.target.value)}
-                                    className={styles.dateInput}
-                                />
-                            </div>
+                        <div className={styles.sidebarHeader}>
+                            <h2>Hệ thống Đường Sắt</h2>
+                        </div>
+                        {/* Thanh điều hướng Tab */}
+                        <div className={styles.tabHeaders}>
+                            <button
+                                className={`${styles.tabBtn} ${activeTab === 'live' ? styles.tabActive : ""}`}
+                                onClick={() => setActiveTab('live')}
+                            >
+                                📡 Trực tuyến
+                            </button>
+                            <button
+                                className={`${styles.tabBtn} ${activeTab === 'history' ? styles.tabActive : ""}`}
+                                onClick={() => setActiveTab('history')}
+                            >
+                                🕑 Lịch sử
+                            </button>
+                        </div>
+                        <div className={styles.sidebarContent}>
+                            {/* Danh sách tàu trực tuyến */}
+                            {activeTab === 'live' && (
+                                <div className={styles.sidebarSection}>
+                                    <h3 className={styles.sectionTitle}>📡 Đang hoạt động ({Object.keys(devices).length})</h3>
+                                    <div className={styles.deviceList}>
+                                        {Object.keys(devices).length > 0 ? (
 
-                            <div className={styles.sessionList}>
-                                {sessions.length > 0 ? (
-                                    sessions.map((s) => (
-                                        <div
-                                            key={s.session_id}
-                                            className={`${styles.sessionItem} ${activeSessionPath ? styles.sessionActive : ""}`}
-                                            onClick={() => handleViewHistory(s.session_id)}
-                                        >
-                                            <div className={styles.sessionMain}>
-                                                <b>{s.ma_tau}</b>
-                                                <span className={styles.sessionPoints}>{s.so_diem} điểm GPS</span>
-                                            </div>
-                                            {/* Hiển thị thời gian bắt đầu và kết thúc 
+                                            Object.keys(devices).map((id) => (
+                                                <div
+                                                    key={id}
+                                                    className={styles.deviceItem}
+                                                    onClick={() => {
+                                                        setSelectedDevicePos([devices[id].lat, devices[id].lng]);
+                                                        setMapBounds(null); // Ưu tiên FlyTo vị trí tàu
+                                                    }}
+                                                >
+                                                    <div className={styles.deviceName}>🚅 {id}</div>
+                                                    <div className={styles.deviceInfo}>
+                                                        <span>🚀Tốc độ: <b>{devices[id].speed}</b> km/h</span>
+                                                        <p><span>🔋Pin: {devices[id].battery}%</span> </p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (<p className={styles.emptyText}>Không có tàu nào trực tuyến</p>
+
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Xem lại hành trình */}
+
+                            {activeTab === 'history' && (
+                                <div className={styles.sidebarSection}>
+                                    <h3 className={styles.sectionTitle}>
+                                        🚞 Danh sách chuyến đi</h3>
+                                    <div className={styles.filterContainer}>
+                                        {/*<label>Chọn ngày xem:</label>*/}
+                                        <input
+                                            type="date"
+                                            value={filterDate}
+                                            onChange={(e) => setFilterDate(e.target.value)}
+                                            className={styles.dateInput}
+                                        />
+                                    </div>
+
+                                    <div className={styles.sessionList}>
+                                        {sessions.length > 0 ? (
+                                            sessions.map((s) => (
+                                                <div
+                                                    key={s.session_id}
+                                                    className={`${styles.sessionItem} ${activeSessionPath ? styles.sessionActive : ""}`}
+                                                    onClick={() => handleViewHistory(s.session_id)}
+                                                >
+                                                    <div className={styles.sessionMain}>
+                                                        <b>{s.ma_tau}</b>
+                                                        <span className={styles.sessionPoints}>{s.so_diem} điểm GPS</span>
+                                                    </div>
+                                                    {/* Hiển thị thời gian bắt đầu và kết thúc 
                                             <div className={styles.sessionTime}>
                                                 🕒 {new Date(s.bat_dau * 1000).toLocaleTimeString()} - {new Date(s.ket_thuc * 1000).toLocaleTimeString()}
                                             </div>*/}
-                                            <div className={styles.sessionTime}>
-                                                🕒 {
-                                                    isNaN(Number(s.bat_dau)) || Number(s.bat_dau) < 0 ? "Không rõ" :
-                                                        new Date(Number(s.bat_dau) * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
-                                                }
-                                                {" - "}
-                                                {
-                                                    isNaN(Number(s.ket_thuc)) || Number(s.ket_thuc) < 0 ? "Không rõ" :
-                                                        new Date(Number(s.ket_thuc) * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
-                                                }
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className={styles.emptyText}> 🚫 Chưa có dữ liệu lịch sử</p>
-                                )}
-                            </div>
-                            {activeSessionPath && (
-                                <button onClick={() => setActiveSessionPath(null)} className={styles.clearBtn}>
-                                    ✕ Đóng hành trình xem lại
-                                </button>
+                                                    <div className={styles.sessionTime}>
+                                                        🕒 {
+                                                            isNaN(Number(s.bat_dau)) || Number(s.bat_dau) < 0 ? "Không rõ" :
+                                                                new Date(Number(s.bat_dau) * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+                                                        }
+                                                        {" - "}
+                                                        {
+                                                            isNaN(Number(s.ket_thuc)) || Number(s.ket_thuc) < 0 ? "Không rõ" :
+                                                                new Date(Number(s.ket_thuc) * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+                                                        }
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className={styles.emptyText}> 🚫 Chưa có dữ liệu lịch sử</p>
+                                        )}
+                                    </div>
+                                    {activeSessionPath && (
+                                        <button onClick={() => setActiveSessionPath(null)} className={styles.clearBtn}>
+                                            ✕ Đóng hành trình xem lại
+                                        </button>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
-                </div>
-            </div>
+                    </div>
+                </>
+            )}
+            {/* Modal đăng nhập */}
+            <LoginModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
             {/* khu vực bản đồ */}
             <div className={styles.mapWrapper}>
