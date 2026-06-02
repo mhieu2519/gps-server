@@ -1,12 +1,16 @@
 // gps-server/gps-map/app/api/dispatch/save-layout/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function POST(request: Request) {
+    // Kiểm tra quyền admin
+    const authError = await requireAdmin();
+    if (authError) return authError;
     try {
         const body = await request.json();
         const { selectedTrip, layout } = body;
-
+        const { trainHead, ma_lo_trinh } = body;
         if (!selectedTrip || !Array.isArray(layout)) {
             return NextResponse.json({ error: "Dữ liệu không hợp lệ" }, { status: 400 });
         }
@@ -68,6 +72,12 @@ export async function POST(request: Request) {
                 [currentCargoCarriageCodes]
             );
         }
+
+        // Bước 4: Cập nhật thông tin chuyến đi
+        await db.query(
+            `UPDATE lich_chay SET ma_dau_may = $1, ma_lo_trinh = $2 WHERE ma_chuyen_di = $3`,
+            [trainHead || null, ma_lo_trinh || null, selectedTrip]
+        );
 
         await db.query("COMMIT");
         return NextResponse.json({ success: true, message: "Lưu cấu hình lập đoàn tàu thành công!" });

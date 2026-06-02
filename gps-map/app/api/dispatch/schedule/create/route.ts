@@ -2,8 +2,12 @@
 // nhận thông tin từ Client gửi lên (mác tàu, ngày chạy) để tạo mới một lịch chạy tàu trong bảng lich_chay_tau
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db'; // Đường dẫn đến file kết nối Postgres của bạn
+import { requireAdmin } from '@/lib/auth-guard';
 
 export async function POST(request: Request) {
+    // Kiểm tra quyền admin
+    const authError = await requireAdmin();
+    if (authError) return authError;
     try {
         const { ma_tau, ngay_chay } = await request.json();
 

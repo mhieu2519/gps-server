@@ -1,8 +1,12 @@
 // app/api/dispatch/schedule/trips/route.ts
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAdmin } from '@/lib/auth-guard';
 
-export async function GET() {
+export async function GET(request: Request) {
+    // Kiểm tra quyền admin
+    const authError = await requireAdmin();
+    if (authError) return authError;
     try {
         // Lấy danh sách chuyến đi, sắp xếp theo ngày chạy giảm dần (mới nhất lên đầu)
         const result = await db.query(`

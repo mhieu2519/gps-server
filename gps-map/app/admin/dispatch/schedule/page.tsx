@@ -134,7 +134,7 @@ export default function SchedulePage() {
                         disabled={isLoading}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-5 py-2.5 rounded shadow-sm transition disabled:bg-gray-400"
                     >
-                        {isLoading ? "Đang xử lý..." : <FcPlus /> + " Tạo Chuyến Đi"}
+                        {isLoading ? "Đang xử lý..." : <><FcPlus /> Tạo Chuyến Đi</>}
                     </button>
                 </form>
 
@@ -174,8 +174,8 @@ export default function SchedulePage() {
                                         <td className="p-3 font-mono font-bold text-blue-600">{trip.ma_chuyen_di}</td>
                                         <td className="p-3 font-medium text-gray-700">{trip.ma_tau}</td>
                                         <td className="p-3 text-gray-600">{new Date(trip.ngay_chay).toLocaleDateString('vi-VN')}</td>
-                                        <td className="p-3 font-mono text-gray-500">{trip.ma_dau_may || <FcHighPriority /> + " Chưa gán"}</td>
-                                        <td className="p-3 font-mono text-gray-500">{trip.ma_lo_trinh || <FcHighPriority /> + " Chưa gán"}</td>
+                                        <td> {trip.ma_dau_may || <span className="flex items-center gap-1 text-amber-500"><FcHighPriority /> Chưa gán</span>}</td>
+                                        <td> {trip.ma_lo_trinh || <span className="flex items-center gap-1 text-amber-500"><FcHighPriority /> Chưa gán</span>}</td>
                                         <td className="p-3 text-center">
                                             <span className={`px-2 py-1 rounded-full text-xs font-semibold ${trip.trang_thai === 'CHO_LAP_TAU' ? 'bg-amber-100 text-amber-700' :
                                                 trip.trang_thai === 'SAN_SANG' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'

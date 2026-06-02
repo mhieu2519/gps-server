@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAdmin } from '@/lib/auth-guard';
 
 export async function DELETE(request: Request) {
+    // Kiểm tra quyền admin
+    const authError = await requireAdmin();
+    if (authError) return authError;
     try {
         const { ma_chuyen_di } = await request.json();
 

@@ -146,7 +146,7 @@ export default function DispatchAdmin() {
                 }
 
                 // Map dữ liệu từ bảng du_lieu_dat_ve sang cấu trúc Frontend
-                const rawCarriages = passengerData.carriages ? passengerData.carriages : passengerData;
+                const rawCarriages = Array.isArray(passengerData) ? passengerData : (passengerData.carriages ?? []);
                 const mappedPassengers: Carriage[] = (rawCarriages || []).map((item: any) => ({
                     id: item.id,
                     carriage_code: item.ma_toa,

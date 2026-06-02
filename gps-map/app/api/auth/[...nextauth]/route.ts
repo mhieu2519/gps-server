@@ -1,9 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { db } from "@/lib/db";
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
     providers: [
         CredentialsProvider({
             name: "Credentials",
@@ -78,9 +78,9 @@ const handler = NextAuth({
     },
     secret: process.env.NEXTAUTH_SECRET, // Đảm bảo đã khai báo khóa bảo mật này trong .env
     session: {
-        strategy: "jwt", // Sử dụng mã hóa JWT Token lưu ở Cookie trình duyệt
+        strategy: "jwt" as const, // Sử dụng mã hóa JWT Token lưu ở Cookie trình duyệt
     }
-});
-
+};
+const handler = NextAuth(authOptions);
 // Giữ nguyên export cho App Router của Next.js
 export { handler as GET, handler as POST };

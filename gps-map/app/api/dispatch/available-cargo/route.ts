@@ -1,8 +1,11 @@
 // gps-server/gps-map/app/api/dispatch/available-cargo/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-
-export async function GET() {
+import { requireAdmin } from "@/lib/auth-guard";
+export async function GET(request: Request) {
+    // Kiểm tra quyền admin
+    const authError = await requireAdmin();
+    if (authError) return authError;
     try {
         // Chỉ lấy các toa hàng mới từ bãi kho, chưa gán vào hành trình nào
         const result = await db.query(

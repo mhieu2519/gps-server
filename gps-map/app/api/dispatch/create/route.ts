@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function POST(request: Request) {
+    // Kiểm tra quyền admin
+    const authError = await requireAdmin();
+    if (authError) return authError;
     try {
         const body = await request.json();
         const { ma_lo_trinh, ten_lo_trinh, danh_sach_ga } = body;
