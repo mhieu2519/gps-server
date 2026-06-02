@@ -2,6 +2,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { FcPlus, FcPlanner, FcSurvey, FcHighPriority, FcApproval, FcEmptyTrash } from "react-icons/fc";
+import { FcFullTrash } from "react-icons/fc";
+
 
 interface Trip {
     ma_chuyen_di: string;
@@ -81,7 +84,7 @@ export default function SchedulePage() {
             const data = await res.json();
 
             if (res.ok) {
-                setMessage({ type: "success", text: `🎉 Tạo thành công chuyến đi: ${data.ma_chuyen_di}` });
+                setMessage({ type: "success", text: <FcApproval className="mr-2" /> + ` Tạo thành công chuyến đi: ${data.ma_chuyen_di}` });
                 fetchSchedules(); // Tải lại danh sách
             } else {
                 setMessage({ type: "error", text: data.error || "Có lỗi xảy ra khi tạo lịch chạy." });
@@ -95,8 +98,9 @@ export default function SchedulePage() {
 
     return (
         <div className="p-6 max-w-5xl mx-auto bg-gray-50 min-h-screen">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                📅 Thiết Lập Lịch Chạy Tàu Hàng Ngày
+            <h1 className="flex items-center xt-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <FcSurvey className="text-xl" />
+                Thiết Lập Lịch Chạy Tàu Hàng Ngày
             </h1>
 
             {/* Khối Form Thêm Mới */}
@@ -106,17 +110,13 @@ export default function SchedulePage() {
                 <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-4">
                     <div className="flex flex-col gap-1 w-48">
                         <label className="text-sm font-medium text-gray-600">Mác Tàu (Mã Tàu)</label>
-                        <select
+                        <input
+                            type="text"
                             value={maTau}
                             onChange={(e) => setMaTau(e.target.value)}
-                            className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        >
-                            <option value="SE1">SE1 (Tàu Khách Bắc Nam)</option>
-                            <option value="SE2">SE2 (Tàu Khách Nam Bắc)</option>
-                            <option value="HP1">HP1 (Hà Nội - Hải Phòng)</option>
-                            <option value="HP2">HP2 (Hải Phòng - Hà Nội)</option>
-                            <option value="HH1">HH1 (Tàu Hàng Bắc Nam)</option>
-                        </select>
+                            placeholder="Nhập mác tàu (VD: SE1, HP1...)"
+                            className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 uppercase"
+                        />
                     </div>
 
                     <div className="flex flex-col gap-1 w-48">
@@ -134,7 +134,7 @@ export default function SchedulePage() {
                         disabled={isLoading}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-5 py-2.5 rounded shadow-sm transition disabled:bg-gray-400"
                     >
-                        {isLoading ? "Đang xử lý..." : "➕ Tạo Chuyến Đi"}
+                        {isLoading ? "Đang xử lý..." : <FcPlus /> + " Tạo Chuyến Đi"}
                     </button>
                 </form>
 
@@ -148,7 +148,8 @@ export default function SchedulePage() {
             {/* Khối Danh Sách Lịch Trình Hiện Có */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-4 border-b border-gray-200 bg-gray-100 font-semibold text-gray-700">
-                    📋 Danh Sách Các Chuyến Đi Đã Thiết Lập
+                    <FcPlanner />
+                    Danh Sách Các Chuyến Đi Đã Thiết Lập
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm border-collapse">
@@ -173,8 +174,8 @@ export default function SchedulePage() {
                                         <td className="p-3 font-mono font-bold text-blue-600">{trip.ma_chuyen_di}</td>
                                         <td className="p-3 font-medium text-gray-700">{trip.ma_tau}</td>
                                         <td className="p-3 text-gray-600">{new Date(trip.ngay_chay).toLocaleDateString('vi-VN')}</td>
-                                        <td className="p-3 font-mono text-gray-500">{trip.ma_dau_may || "❌ Chưa gán"}</td>
-                                        <td className="p-3 font-mono text-gray-500">{trip.ma_lo_trinh || "❌ Chưa gán"}</td>
+                                        <td className="p-3 font-mono text-gray-500">{trip.ma_dau_may || <FcHighPriority /> + " Chưa gán"}</td>
+                                        <td className="p-3 font-mono text-gray-500">{trip.ma_lo_trinh || <FcHighPriority /> + " Chưa gán"}</td>
                                         <td className="p-3 text-center">
                                             <span className={`px-2 py-1 rounded-full text-xs font-semibold ${trip.trang_thai === 'CHO_LAP_TAU' ? 'bg-amber-100 text-amber-700' :
                                                 trip.trang_thai === 'SAN_SANG' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
@@ -183,9 +184,10 @@ export default function SchedulePage() {
                                             </span>
                                             <button
                                                 onClick={() => handleDelete(trip.ma_chuyen_di)}
-                                                className="text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 hover:border-red-500 rounded px-2 py-1 transition"
+                                                className="flex items-center text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 hover:border-red-500 rounded px-2 py-1 transition"
                                             >
-                                                🗑️ Xóa
+                                                <FcEmptyTrash className="mr-1" />
+                                                <span className="ml-1"> Xóa</span>
                                             </button>
                                         </td>
                                     </tr>

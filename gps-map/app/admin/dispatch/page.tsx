@@ -318,7 +318,7 @@ export default function DispatchAdmin() {
                         ) : (
                             trips.map((trip) => (
                                 <option key={trip.ma_chuyen_di} value={trip.ma_chuyen_di}>
-                                    🚂 {trip.ma_tau} ({trip.ngay_chay}) - {trip.ma_chuyen_di}
+                                    {trip.ma_chuyen_di}
                                 </option>
                             ))
                         )}
@@ -376,13 +376,13 @@ export default function DispatchAdmin() {
 
                             <div className={`w-40 h-24 rounded-lg flex flex-col justify-between p-2 text-white text-xs relative border-b-4 transition ${!c.isActive
                                 ? "bg-gray-800 border-gray-950 opacity-30"
-                                : c.type === "HANG_HOA"
+                                : (c.type === "HANG_HOA" || !!c.ten_hang_hoa)
                                     ? "bg-emerald-600 border-emerald-800"
                                     : "bg-sky-600 border-sky-800"
                                 }`}>
                                 <div className="flex justify-between items-center font-mono font-bold text-[10px]">
                                     <span>{c.carriage_code}</span>
-                                    {c.type === "HANG_HOA" && (
+                                    {(c.type === "HANG_HOA" || !!c.ten_hang_hoa) && (
                                         <button
                                             onClick={() => handleRemoveCargoCarriage(c.id)}
                                             className="text-gray-300 hover:text-red-400 font-bold text-sm"
@@ -390,11 +390,16 @@ export default function DispatchAdmin() {
                                     )}
                                 </div>
 
+
                                 <div className="text-[10px] leading-tight text-gray-100">
-                                    {c.type === "HANG_HOA" ? (
+                                    {(c.type === "HANG_HOA" || !!c.ten_hang_hoa) ? (
                                         <div>
-                                            <div className="font-medium truncate flex items-center gap-1"><BsBoxSeam className="mr-2" /> {c.ten_hang_hoa}</div>
-                                            <div className="text-[9px] text-emerald-200">{c.current_cargo_weight}/{c.max_cargo_capacity} {c.don_vi}</div>
+                                            <div className="font-medium truncate flex items-center gap-1">
+                                                <BsBoxSeam className="mr-2" /> {c.ten_hang_hoa || "Hàng hóa"}
+                                            </div>
+                                            <div className="text-[9px] text-emerald-200">
+                                                {c.current_cargo_weight || 0}/{c.max_cargo_capacity || 0} {c.don_vi || "tấn"}
+                                            </div>
                                         </div>
                                     ) : c.current_passenger_count > 0 ? (
                                         <div className="flex items-center gap-1">
