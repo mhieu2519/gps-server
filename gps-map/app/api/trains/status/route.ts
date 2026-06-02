@@ -1,6 +1,7 @@
 //app/api/trains/status/route.ts
 //API để trang web lấy trạng thái toàn bộ tàu khi người dùng vừa mới load trang 
 //để khởi tạo biến devices
+//Đồng thời, API này cũng trả về chi tiết danh sách toa tàu và danh sách ga chi tiết đã đối chiếu để Map.tsx nhận diện hiển thị trên bản đồ
 import { NextResponse } from 'next/server';
 import { db } from "@/lib/db";
 
@@ -39,7 +40,30 @@ export async function GET() {
                 AND cd.trang_thai = 'dang_chay'
             ),
             '[]'
-        ) AS danh_sach_toa
+        ) AS danh_sach_toa,
+
+         -- Phục vụ bài toán lộ trình: Đối chiếu mảng mã ga lộ trình sang bảng 'ga' để lấy chi tiết tọa độ
+        COALESCE(
+            (
+                SELECT json_agg(
+                    json_build_object(
+                        'ma_ga', g.ma_ga,
+                        'ten_ga', g.ten_ga,
+                        'lat', ST_Y(g.geom), -- Trích xuất Vĩ độ từ cột PostGIS geom
+                        'lng', ST_X(g.geom)  -- Trích xuất Kinh độ từ cột PostGIS geom
+                    )
+                    ORDER BY ga_st.thu_tu_ga ASC -- Đảm bảo ga xếp đúng thứ tự hành trình đi
+                )
+                FROM chuyen_di cd
+                JOIN lo_trinh lt ON cd.ma_lo_trinh = lt.ma_lo_trinh
+                -- unnest rải mảng mã ga kết hợp WITH ORDINALITY để đánh số thứ tự (thu_tu_ga) tự động
+                CROSS JOIN LATERAL unnest(lt.danh_sach_ga) WITH ORDINALITY AS ga_st(ma_ga, thu_tu_ga)
+                JOIN ga g ON g.ma_ga = ga_st.ma_ga
+                WHERE cd.ma_tau_chay = t.ma_tau
+                AND cd.trang_thai = 'dang_chay'
+            ),
+            '[]'
+        ) AS danh_sach_ga_chi_tiet
 
     FROM tau t
 `);
@@ -54,7 +78,8 @@ export async function GET() {
                 battery: row.battery,
                 signal: row.signal,
                 timestamp: Number(row.timestamp), //ép kiểu số do PostgreSQL BIGINT trả về string 
-                danh_sach_toa: row.danh_sach_toa
+                danh_sach_toa: row.danh_sach_toa,
+                danh_sach_ga_chi_tiet: row.danh_sach_ga_chi_tiet  // Đẩy mảng ga chi tiết đã đối chiếu ra ngoài cho Frontend Map.tsx nhận diện
             };
             return acc;
         }, {});
