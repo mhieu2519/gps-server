@@ -37,7 +37,7 @@ export async function GET() {
                 JOIN chi_tiet_lap_tau ctlt
                     ON ctlt.ma_chuyen_di = cd.ma_chuyen_di
                 WHERE cd.ma_tau_chay = t.ma_tau
-                AND cd.trang_thai = 'RUNNING'
+                AND cd.trang_thai = 'dang_chay'
             ),
             '[]'
         ) AS danh_sach_toa,
@@ -60,7 +60,7 @@ export async function GET() {
                 CROSS JOIN LATERAL unnest(lt.danh_sach_ga) WITH ORDINALITY AS ga_st(ma_ga, thu_tu_ga)
                 JOIN ga g ON g.ma_ga = ga_st.ma_ga
                 WHERE cd.ma_tau_chay = t.ma_tau
-                AND cd.trang_thai = 'RUNNING'
+                AND cd.trang_thai = 'dang_chay'
             ),
             '[]'
         ) AS danh_sach_ga_chi_tiet
