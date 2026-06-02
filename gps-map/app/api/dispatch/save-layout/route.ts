@@ -126,7 +126,7 @@ export async function POST(request: Request) {
             `UPDATE chuyen_di 
              SET ma_tau_chay = $1, 
              ma_lo_trinh = $2, 
-             trang_thai = 'RUNNING' -- Chuyển sang RUNNING để luồng quét GPS bắt đầu bắt tín hiệu hiển thị toa xe
+             trang_thai = 'dang_chay' -- Chuyển sang dang_chay để luồng quét GPS bắt đầu bắt tín hiệu hiển thị toa xe
              WHERE ma_chuyen_di = $3`,
             [trainHead || null, ma_lo_trinh || null, selectedTrip]
         );
