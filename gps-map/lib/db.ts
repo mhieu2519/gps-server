@@ -1,5 +1,5 @@
 // lib/db.ts
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 
 // Tận dụng lại DATABASE_URL 
 const pool = new Pool({
@@ -16,5 +16,6 @@ export const db = {
         } finally {
             client.release(); // Luôn tự động giải phóng kết nối sau khi chạy xong
         }
-    }
+    },
+    connect: (): Promise<PoolClient> => pool.connect(),
 };
