@@ -87,7 +87,10 @@ export default function SchedulePage() {
             if (res.ok) {
                 setMessage({
                     type: "success",
-                    text: <> <FcApproval className="mr-2" /> Tạo thành công chuyến đi: {data.ma_chuyen_di} </>
+                    text:
+                        <span className="flex items-center gap-2">
+                            <FcApproval className="mr-2 text-2xl" /> Tạo thành công chuyến đi: {data.ma_chuyen_di}
+                        </span>
                 });
                 fetchSchedules(); // Tải lại danh sách
             } else {
@@ -151,8 +154,8 @@ export default function SchedulePage() {
 
             {/* Khối Danh Sách Lịch Trình Hiện Có */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-100 font-semibold text-gray-700">
-                    <FcSurvey className="mr-2 text-3xl" />
+                <div className="flex items-center p-4 border-b border-gray-200 bg-gray-100 font-semibold text-gray-700">
+                    <FcSurvey className="text-3xl" />
                     Danh Sách Các Chuyến Đi Đã Thiết Lập
                 </div>
                 <div className="overflow-x-auto">
@@ -162,8 +165,8 @@ export default function SchedulePage() {
                                 <th className="p-3">Mã Chuyến Đi</th>
                                 <th className="p-3">Mác Tàu</th>
                                 <th className="p-3">Ngày Chạy</th>
-                                <th className="p-3">Đầu Máy Gán</th>
-                                <th className="p-3">Lộ Trình Gán</th>
+                                <th className="p-3">Đầu Máy</th>
+                                <th className="p-3">Lộ Trình</th>
                                 <th className="p-3 text-center">Trạng Thái</th>
                             </tr>
                         </thead>
@@ -188,7 +191,7 @@ export default function SchedulePage() {
                                             </span>
                                             <button
                                                 onClick={() => handleDelete(trip.ma_chuyen_di)}
-                                                className="flex items-center text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 hover:border-red-500 rounded px-2 py-1 transition"
+                                                className="flex items-center text-center gap-1 ml-2 text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 hover:border-red-500 rounded px-2 py-1 transition"
                                             >
                                                 <FcEmptyTrash className="mr-1" />
                                                 Xóa
