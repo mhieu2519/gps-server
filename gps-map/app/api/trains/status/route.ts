@@ -49,8 +49,8 @@ export async function GET() {
                     json_build_object(
                         'ma_ga', g.ma_ga,
                         'ten_ga', g.ten_ga,
-                        'lat', ST_Y(g.geom), -- Trích xuất Vĩ độ từ cột PostGIS geom
-                        'lng', ST_X(g.geom)  -- Trích xuất Kinh độ từ cột PostGIS geom
+                        'lat', ST_Y(ST_Centroid(g.geom)), -- Trích xuất Vĩ độ từ cột PostGIS geom
+                        'lng', ST_X(ST_Centroid(g.geom))  -- Trích xuất Kinh độ từ cột PostGIS geom
                     )
                     ORDER BY ga_st.thu_tu_ga ASC -- Đảm bảo ga xếp đúng thứ tự hành trình đi
                 )
@@ -58,7 +58,7 @@ export async function GET() {
                 JOIN lo_trinh lt ON cd.ma_lo_trinh = lt.ma_lo_trinh
                 -- unnest rải mảng mã ga kết hợp WITH ORDINALITY để đánh số thứ tự (thu_tu_ga) tự động
                 CROSS JOIN LATERAL unnest(lt.danh_sach_ga) WITH ORDINALITY AS ga_st(ma_ga, thu_tu_ga)
-                JOIN ga g ON g.ma_ga = ga_st.ma_ga
+                JOIN ga g ON g.ma_ga::text = ga_st.ma_ga::text
                 WHERE cd.ma_tau_chay = t.ma_tau
                 AND cd.trang_thai = 'dang_chay'
             ),

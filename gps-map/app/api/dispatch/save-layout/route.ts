@@ -27,7 +27,7 @@ export async function POST(request: Request) {
             const ngay_chay = scheduleCheck.rows[0]?.ngay_chay || new Date();
 
             await client.query(
-                `INSERT INTO chuyen_di (ma_chuyen_di, ngay_chay, trang_thai) VALUES ($1, $2, 'READY')`,
+                `INSERT INTO chuyen_di (ma_chuyen_di, ngay_chay, trang_thai) VALUES ($1, $2, 'san_sang')`,
                 [selectedTrip, ngay_chay]
             );
         }
