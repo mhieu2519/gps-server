@@ -444,7 +444,7 @@ export default function DispatchAdmin() {
                                 <tr key={`${c.id}-${index}`} className={!c.isActive ? "bg-gray-50 text-gray-400" : ""}>
                                     <td className="px-4 py-3 font-mono font-bold">{c.carriage_code}</td>
                                     <td className="px-4 py-3">
-                                        {c.type === "HANG_HOA" ? (
+                                        {(c.type === "HANG_HOA" || !!c.ten_hang_hoa) ? (
                                             <span className="flex items-center gap-1 text-emerald-700 font-medium"> <LiaOpencart className="mr-2" /> Hàng hóa: {c.ten_hang_hoa}</span>
                                         ) : c.type === "KH_NAM" ? (
                                             <div className="flex items-center gap-1">
@@ -457,14 +457,14 @@ export default function DispatchAdmin() {
                                         )}
                                     </td>
                                     <td className="px-4 py-3 text-center font-bold text-gray-700">
-                                        {c.type === "HANG_HOA" ? (
+                                        {(c.type === "HANG_HOA" || !!c.ten_hang_hoa) ? (
                                             <span className="text-emerald-600">{c.current_cargo_weight} / {c.max_cargo_capacity} {c.don_vi}</span>
                                         ) : (
                                             `${c.current_passenger_count} / ${c.max_capacity}`
                                         )}
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        {c.type === "HANG_HOA" ? (
+                                        {(c.type === "HANG_HOA" || !!c.ten_hang_hoa) ? (
                                             <span className="text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">Đã móc nối đuôi</span>
                                         ) : (
                                             <button

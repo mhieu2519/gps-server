@@ -1,7 +1,7 @@
 // app/admin/dispatch/schedule/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { FcPlus, FcPlanner, FcSurvey, FcHighPriority, FcApproval, FcEmptyTrash } from "react-icons/fc";
 import { FcFullTrash } from "react-icons/fc";
 
@@ -23,7 +23,8 @@ export default function SchedulePage() {
     // State danh sách hiển thị
     const [trips, setTrips] = useState<Trip[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [message, setMessage] = useState({ type: "", text: "" });
+    //const [message, setMessage] = useState({ type: "", text: "" });
+    const [message, setMessage] = useState<{ type: "success" | "error"; text: React.ReactNode } | null>(null);
 
     // Tải danh sách lịch chạy hiện tại
     const fetchSchedules = async () => {
@@ -67,12 +68,12 @@ export default function SchedulePage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!ngayChay) {
-            setMessage({ type: "error", text: "Vui lòng chọn ngày chạy tàu!" });
+            setMessage({ type: "error", text: <>Vui lòng chọn ngày chạy tàu!</> });
             return;
         }
 
         setIsLoading(true);
-        setMessage({ type: "", text: "" });
+        setMessage(null); // Reset message trước khi gửi yêu cầu
 
         try {
             const res = await fetch("/api/dispatch/schedule/create", {
@@ -84,7 +85,10 @@ export default function SchedulePage() {
             const data = await res.json();
 
             if (res.ok) {
-                setMessage({ type: "success", text: <FcApproval className="mr-2" /> + ` Tạo thành công chuyến đi: ${data.ma_chuyen_di}` });
+                setMessage({
+                    type: "success",
+                    text: <> <FcApproval className="mr-2" /> Tạo thành công chuyến đi: {data.ma_chuyen_di} </>
+                });
                 fetchSchedules(); // Tải lại danh sách
             } else {
                 setMessage({ type: "error", text: data.error || "Có lỗi xảy ra khi tạo lịch chạy." });
@@ -99,7 +103,7 @@ export default function SchedulePage() {
     return (
         <div className="p-6 max-w-5xl mx-auto bg-gray-50 min-h-screen">
             <h1 className="flex items-center xt-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <FcSurvey className="text-xl" />
+                <FcPlanner className="text-3xl" />
                 Thiết Lập Lịch Chạy Tàu Hàng Ngày
             </h1>
 
@@ -132,13 +136,13 @@ export default function SchedulePage() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-5 py-2.5 rounded shadow-sm transition disabled:bg-gray-400"
+                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-5 py-2.5 rounded shadow-sm transition disabled:bg-gray-400"
                     >
-                        {isLoading ? "Đang xử lý..." : <><FcPlus /> Tạo Chuyến Đi</>}
+                        {isLoading ? "Đang xử lý..." : <><FcPlus className="text-2xl" /> Tạo Chuyến Đi</>}
                     </button>
                 </form>
 
-                {message.text && (
+                {message && (
                     <div className={`mt-4 p-3 rounded text-sm font-medium ${message.type === "success" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
                         {message.text}
                     </div>
@@ -147,8 +151,8 @@ export default function SchedulePage() {
 
             {/* Khối Danh Sách Lịch Trình Hiện Có */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-4 border-b border-gray-200 bg-gray-100 font-semibold text-gray-700">
-                    <FcPlanner />
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-100 font-semibold text-gray-700">
+                    <FcSurvey className="mr-2 text-3xl" />
                     Danh Sách Các Chuyến Đi Đã Thiết Lập
                 </div>
                 <div className="overflow-x-auto">
@@ -187,7 +191,7 @@ export default function SchedulePage() {
                                                 className="flex items-center text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 hover:border-red-500 rounded px-2 py-1 transition"
                                             >
                                                 <FcEmptyTrash className="mr-1" />
-                                                <span className="ml-1"> Xóa</span>
+                                                Xóa
                                             </button>
                                         </td>
                                     </tr>
