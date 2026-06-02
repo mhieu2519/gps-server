@@ -107,16 +107,29 @@ export async function POST(request: Request) {
         }
 
         // BƯỚC 6: ĐỒNG BỘ ĐẦU MÁY VÀ LỘ TRÌNH VỀ CÁC BẢNG LỊCH TRÌNH
+        // Nếu có đầu máy mới, thêm vào bảng public.tau nếu chưa tồn tại, sau đó cập nhật vào lich_chay_tau và chuyen_di
+        if (trainHead) {
+            await client.query(`
+                INSERT INTO public.tau (ma_tau, timestamp)
+                VALUES ($1, $2)
+                ON CONFLICT (ma_tau) DO NOTHING
+            `, [trainHead, Math.floor(Date.now() / 1000)]);
+        }
         await client.query(
-            `UPDATE lich_chay_tau SET ma_dau_may = $1, ma_lo_trinh = $2, trang_thai = 'DA_LAP_TAU' WHERE ma_chuyen_di = $3`,
+            `UPDATE lich_chay_tau 
+             SET ma_dau_may = $1, ma_lo_trinh = $2, trang_thai = 'DA_LAP_TAU' 
+             WHERE ma_chuyen_di = $3`,
             [trainHead || null, ma_lo_trinh || null, selectedTrip]
         );
 
         await client.query(
-            `UPDATE chuyen_di SET ma_lo_trinh = $1 WHERE ma_chuyen_di = $2`,
-            [ma_lo_trinh || null, selectedTrip]
+            `UPDATE chuyen_di 
+             SET ma_tau_chay = $1, 
+             ma_lo_trinh = $2, 
+             trang_thai = 'RUNNING' -- Chuyển sang RUNNING để luồng quét GPS bắt đầu bắt tín hiệu hiển thị toa xe
+             WHERE ma_chuyen_di = $3`,
+            [trainHead || null, ma_lo_trinh || null, selectedTrip]
         );
-
         await client.query("COMMIT");
         return NextResponse.json({ success: true, message: "Phân phối dữ liệu lập tàu thành công!" });
 
