@@ -34,7 +34,7 @@ export default function TrainRouteProgress({
 
     const totalStations = routeStations.length;
 
-    // TÍNH TOÁN TIẾN ĐỘ
+    // Tính toán tiến độ
     let absoluteClosestIdx = 0;
     let minDistanceToAnyStation = Infinity;
 
@@ -45,8 +45,9 @@ export default function TrainRouteProgress({
             absoluteClosestIdx = index;
         }
     });
-
-    const isAtStation = minDistanceToAnyStation < 800;
+    // Nếu có biến currentSpeed truyền vào từ props:
+    // const isAtStation = minDistanceToAnyStation < 200 && currentSpeed < 5;
+    const isAtStation = minDistanceToAnyStation < 200; // Ngưỡng 200m để xác định "đang đỗ tại ga"
     let progressPercent = 0;
     let nextStationIndex = 0;
 
@@ -94,19 +95,18 @@ export default function TrainRouteProgress({
     }, [nextStationIndex, isAtStation]);
 
     // Định dạng độ rộng cố định cho mỗi phân đoạn ga để chống dồn chữ khi cuộn ngang
-    const stationWidth = 90;
+    const stationWidth = 68;
     const timelineWidth = (totalStations - 1) * stationWidth;
-
     return (
-        <div className="w-full bg-white p-4 rounded-xl border border-gray-100 shadow-sm my-3 select-none">
+        <div className="w-full bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm my-3 select-none">
             {/* Header trạng thái */}
             <div className="flex justify-between items-center mb-4">
                 <span className="flex items-center text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                     <FcMindMap className="mr-1.5 text-lg" /> Tiến độ lộ trình
                 </span>
                 <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${isAtStation
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : "bg-blue-50 text-blue-700 border-blue-200"
+                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                    : "bg-blue-50 text-blue-700 border-blue-200"
                     }`}>
                     {isAtStation
                         ? `Đang đỗ: ${routeStations[absoluteClosestIdx].ten_ga}`
@@ -160,13 +160,13 @@ export default function TrainRouteProgress({
                                 }}
                             >
                                 {/* Nút tròn Ga */}
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 text-[11px] font-bold transition-all duration-500 bg-white ${isCurrent && isAtStation
-                                        ? "border-amber-500 text-amber-600 scale-110 shadow-md ring-4 ring-amber-100"
-                                        : isCurrent && !isAtStation
-                                            ? "border-blue-500 text-blue-600 scale-110 shadow-md ring-4 ring-blue-100"
-                                            : isPassed
-                                                ? "border-blue-500 bg-blue-50 text-blue-600"
-                                                : "border-gray-200 text-gray-400"
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[8px] font-bold transition-all duration-500 bg-white ${isCurrent && isAtStation
+                                    ? "border-amber-500 text-amber-600 scale-110 shadow-md ring-4 ring-amber-100"
+                                    : isCurrent && !isAtStation
+                                        ? "border-blue-500 text-blue-600 scale-110 shadow-md ring-4 ring-blue-100"
+                                        : isPassed
+                                            ? "border-blue-500 bg-blue-50 text-blue-600"
+                                            : "border-gray-200 text-gray-400"
                                     }`}>
                                     {isCurrent ? (
                                         <FcRating className="text-base animate-pulse" />
@@ -178,12 +178,12 @@ export default function TrainRouteProgress({
                                 {/* Nhãn tên Ga nằm cố định phía dưới nút */}
                                 <div className="absolute top-10 flex flex-col items-center text-center w-[120px]">
                                     <span className={`text-[11px] font-semibold tracking-tight line-clamp-2 text-center leading-tight transition-colors duration-300 ${isCurrent && isAtStation
-                                            ? "text-amber-600 font-bold"
-                                            : isCurrent && !isAtStation
-                                                ? "text-blue-600 font-bold"
-                                                : isPassed
-                                                    ? "text-gray-700"
-                                                    : "text-gray-400"
+                                        ? "text-amber-600 font-bold"
+                                        : isCurrent && !isAtStation
+                                            ? "text-blue-600 font-bold"
+                                            : isPassed
+                                                ? "text-gray-700"
+                                                : "text-gray-400"
                                         }`}>
                                         {station.ten_ga}
                                     </span>
