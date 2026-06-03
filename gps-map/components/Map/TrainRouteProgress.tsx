@@ -116,66 +116,69 @@ export default function TrainRouteProgress({
             </div>
 
             {/* Thanh ngang lộ trình */}
-            <div className="relative flex items-center justify-between w-full mt-6 px-3">
-                {/* Đường nối ray nền xám cố định */}
-                <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded -z-10"></div>
+            <div className="relative w-full mt-6 px-3 overflow-x-auto scrollbar-none flex items-center py-4">
+                <div className="relative flex items-center justify-between min-w-[1200px] w-full px-3">
+                    {/* Đường nối ray nền xám cố định */}
+                    <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded -z-10"></div>
 
-                {/* Đường tiến độ màu xanh chạy MƯỢT MÀ theo vị trí thực của tàu */}
-                <div
-                    className="absolute left-4 top-1/2 -translate-y-1/2 h-1 bg-blue-500 rounded -z-10 transition-all duration-700 ease-out"
-                    style={{
-                        width: `${progressPercent}%`,
-                        maxWidth: 'calc(100% - 32px)'
-                    }}
-                ></div>
+                    {/* Đường tiến độ màu xanh chạy MƯỢT MÀ theo vị trí thực của tàu */}
+                    <div
+                        className="absolute left-4 top-1/2 -translate-y-1/2 h-1 bg-blue-500 rounded -z-10 transition-all duration-700 ease-out"
+                        style={{
+                            width: `${progressPercent}%`,
+                            maxWidth: 'calc(100% - 32px)'
+                        }}
+                    ></div>
 
-                {/* Vòng tròn các Ga */}
-                {routeStations.map((station, idx) => {
-                    // Xác định trạng thái trực quan cho từng Ga nút tròn
-                    let isPassed = false;
-                    let isCurrent = false;
+                    {/* Vòng tròn các Ga */}
+                    {routeStations.map((station, idx) => {
+                        // Xác định trạng thái trực quan cho từng Ga nút tròn
+                        let isPassed = false;
+                        let isCurrent = false;
 
-                    if (isAtStation) {
-                        isPassed = idx < absoluteClosestIdx;
-                        isCurrent = idx === absoluteClosestIdx;
-                    } else {
-                        // Nếu tàu đang chạy giữa đường: Các ga có index nhỏ hơn ga sắp tới đều là đã qua
-                        isPassed = idx < nextStationIndex;
-                        isCurrent = idx === nextStationIndex; // Làm sáng ga tiếp theo đang đợi tàu đến
-                    }
+                        if (isAtStation) {
+                            isPassed = idx < absoluteClosestIdx;
+                            isCurrent = idx === absoluteClosestIdx;
+                        } else {
+                            // Nếu tàu đang chạy giữa đường: Các ga có index nhỏ hơn ga sắp tới đều là đã qua
+                            isPassed = idx < nextStationIndex;
+                            isCurrent = idx === nextStationIndex; // Làm sáng ga tiếp theo đang đợi tàu đến
+                        }
 
-                    return (
-                        <div key={station.ma_ga} className="flex flex-col items-center relative">
-                            {/* Điểm nút ga */}
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] font-mono font-bold transition-all duration-500 ${isCurrent && isAtStation
+                        return (
+                            <div key={station.ma_ga} className="flex flex-col items-center relative flex-shrink-0 w-[70px]">
+                                {/* Điểm nút ga */}
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] font-mono font-bold transition-all duration-500 ${isCurrent && isAtStation
                                     ? "bg-amber-500 border-amber-600 text-white scale-125 shadow-md animate-pulse"
                                     : isCurrent && !isAtStation
                                         ? "bg-blue-500 border-blue-600 text-white scale-110 animate-bounce" // Nhún nhảy ở ga đích đang đợi tàu gel
                                         : isPassed
                                             ? "bg-blue-500 border-blue-600 text-white"
                                             : "bg-white border-gray-300 text-gray-400"
-                                }`}>
-                                {isCurrent ? <FcRating /> : idx + 1}
-                            </div>
-
-                            {/* Tên Ga chữ nhỏ ở dưới */}
-                            <div className="absolute top-7 flex flex-col items-center text-center">
-                                <span className={`text-[10px] font-bold max-w-[65px] truncate block transition-all ${isCurrent && isAtStation
-                                        ? "text-amber-600 font-extrabold"
-                                        : isCurrent && !isAtStation
-                                            ? "text-blue-600 font-extrabold animate-pulse"
-                                            : isPassed
-                                                ? "text-blue-500"
-                                                : "text-gray-400"
                                     }`}>
-                                    {station.ten_ga}
-                                </span>
-                                <span className="text-[8px] text-gray-400 font-mono -mt-0.5">({station.ma_ga})</span>
+                                    {isCurrent ? <FcRating /> : idx + 1}
+                                </div>
+
+                                {/* Tên Ga chữ nhỏ ở dưới */}
+                                <div className="absolute top-7 flex flex-col items-center text-center w-full">
+                                    <span className={`text-[10px] font-bold max-w-[65px] truncate block transition-all ${isCurrent && isAtStation
+                                            ? "text-amber-600 font-extrabold"
+                                            : isCurrent && !isAtStation
+                                                ? "text-blue-600 font-extrabold animate-pulse"
+                                                : isPassed
+                                                    ? "text-blue-500"
+                                                    : "text-gray-400"
+                                        }`}>
+                                        {station.ten_ga}
+                                    </span>
+                                    <span className="text-[8px] text-gray-400 font-mono -mt-0.5">({station.ma_ga})</span>
+                                </div>
                             </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })}
+                </div>
             </div>
+
             {/* Tạo khoảng cách đệm phía dưới */}
             <div className="h-6"></div>
         </div>
