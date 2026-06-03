@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const userRole = request.cookies.get('user_role')?.value;
+    const userRole = request.cookies.get('vai_tro')?.value;
 
     // Chặn tất cả những ai CHƯA ĐĂNG NHẬP muốn vào bất kỳ trang nào thuộc /admin
     if (pathname.startsWith('/admin') && !userRole) {
