@@ -129,18 +129,19 @@ export default function TrainRouteProgress({
             </div>
 
             {/* Thanh ngang lộ trình */}
-            <div className="relative w-full mt-6 px-3 overflow-x-auto overflow-y-hidden flex items-center py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="relative w-full px-3 overflow-x-auto overflow-y-hidden flex items-center [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
                 <div className="relative flex items-center justify-between w-full px-8">
                     {/* Đường nối ray nền xám cố định */}
-                    <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded z-0"></div>
+                    <div className="absolute left-[14px] right-[14px] top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded z-0"></div>
 
                     {/* Đường tiến độ màu xanh chạy MƯỢT MÀ theo vị trí thực của tàu */}
                     <div
-                        className="absolute left-4 top-1/2 -translate-y-1/2 h-1 bg-blue-500 rounded -z-10 transition-all duration-700 ease-out z-20"
+                        className="absolute top-1/2 -translate-y-1/2 h-1 bg-blue-500 rounded -z-10 transition-all duration-700 ease-out z-20"
                         style={{
-                            width: `${progressPercent}%`,
-                            // maxWidth: 'calc(100% - 32px)'
+                            left: '14px',
+                            width: `calc(${progressPercent}% * (100% - 28px) / 100)`
+
                         }}
                     ></div>
 
@@ -163,7 +164,8 @@ export default function TrainRouteProgress({
                             <div
                                 key={station.ma_ga}
                                 ref={isCurrent ? currentStationRef : null}
-                                className="flex flex-col items-center relative flex-shrink-0 w-[70px]"
+                                //className="flex flex-col items-center relative flex-shrink-0 "
+                                className="flex flex-col items-center relative"
                             >
                                 {/* Điểm nút ga */}
                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] font-mono font-bold transition-all duration-500 ${isCurrent && isAtStation
