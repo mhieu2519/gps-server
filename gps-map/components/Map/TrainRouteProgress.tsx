@@ -1,5 +1,6 @@
 // gps-server/gps-map/components/Map/TrainRouteProgress.tsx
 // hiển thị tiến độ lộ trình của tàu, dựa trên dữ liệu tuyến đường và vị trí hiện tại của tàu
+import { useEffect, useRef } from "react";
 import { FcMindMap, FcRating } from "react-icons/fc";
 
 // tính khoảng cách giữa 2 điểm (lat1, lng1) và (lat2, lng2) bằng công thức Haversine
@@ -31,13 +32,15 @@ export default function TrainRouteProgress({
     currentLng: number;
     routeStations: StationDetails[]
 }) {
+    // Ref để lưu trữ ga gần nhất đã xác định được, tránh việc tính toán lại quá nhiều lần khi vị trí tàu cập nhật liên tục
+    const currentStationRef = useRef<HTMLDivElement | null>(null);
     if (!routeStations || routeStations.length === 0) return null;
 
     const totalStations = routeStations.length;
 
-    // --- LOGIC MỚI: TÍNH TOÁN TIẾN ĐỘ TUYẾN TÍNH CHUẨN XÁC ---
+    // TÍNH TOÁN TIẾN ĐỘ 
 
-    // 1. Tìm ga gần nhất để kiểm tra xem có đang đỗ trong ga nào không
+    // Tìm ga gần nhất để kiểm tra xem có đang đỗ trong ga nào không
     let absoluteClosestIdx = 0;
     let minDistanceToAnyStation = Infinity;
 
@@ -52,7 +55,7 @@ export default function TrainRouteProgress({
     // Nếu khoảng cách đến bất kỳ ga nào < 800m -> Đang đỗ tại ga đó
     const isAtStation = minDistanceToAnyStation < 800;
 
-    // 2. Tính toán vị trí phần trăm (0 - 100%) thực tế của tàu trên toàn tuyến
+    // Tính toán vị trí phần trăm (0 - 100%) thực tế của tàu trên toàn tuyến
     let progressPercent = 0;
     let nextStationIndex = 0;
 
@@ -102,6 +105,16 @@ export default function TrainRouteProgress({
         nextStationIndex = segmentIdx + 1;
     }
 
+    useEffect(() => {
+        if (currentStationRef.current) {
+            currentStationRef.current.scrollIntoView({
+                behavior: "smooth", // Cuộn mượt mà chống giật hình
+                block: "nearest",   // Giữ nguyên vị trí cuộn theo chiều dọc Y
+                inline: "center"    // Đẩy ga hiện tại nằm chính giữa khung nhìn ngang X
+            });
+        }
+    }, [nextStationIndex, isAtStation]); // Kích hoạt cuộn lại mỗi khi tàu chuyển khu gian hoặc dừng/đi
+
     return (
         <div className="w-full bg-gray-50 p-4 rounded-xl border border-gray-200 my-3 select-none">
             <div className="flex justify-between items-center mb-2">
@@ -116,7 +129,8 @@ export default function TrainRouteProgress({
             </div>
 
             {/* Thanh ngang lộ trình */}
-            <div className="relative w-full mt-6 px-3 overflow-x-auto scrollbar-none flex items-center py-4">
+            <div className="relative w-full mt-6 px-3 overflow-x-auto overflow-y-hidden flex items-center py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+
                 <div className="relative flex items-center justify-between min-w-[1200px] w-full px-3">
                     {/* Đường nối ray nền xám cố định */}
                     <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded -z-10"></div>
@@ -146,7 +160,11 @@ export default function TrainRouteProgress({
                         }
 
                         return (
-                            <div key={station.ma_ga} className="flex flex-col items-center relative flex-shrink-0 w-[70px]">
+                            <div
+                                key={station.ma_ga}
+                                ref={isCurrent ? currentStationRef : null}
+                                className="flex flex-col items-center relative flex-shrink-0 w-[70px]"
+                            >
                                 {/* Điểm nút ga */}
                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] font-mono font-bold transition-all duration-500 ${isCurrent && isAtStation
                                     ? "bg-amber-500 border-amber-600 text-white scale-125 shadow-md animate-pulse"
@@ -159,9 +177,9 @@ export default function TrainRouteProgress({
                                     {isCurrent ? <FcRating /> : idx + 1}
                                 </div>
 
-                                {/* Tên Ga chữ nhỏ ở dưới */}
+                                {/* Tên Ga */}
                                 <div className="absolute top-7 flex flex-col items-center text-center w-full">
-                                    <span className={`text-[10px] font-bold max-w-[65px] truncate block transition-all ${isCurrent && isAtStation
+                                    <span className={`text-[10px] font-bold line-clamp-2 text-center block leading-tight transition-all ${isCurrent && isAtStation
                                             ? "text-amber-600 font-extrabold"
                                             : isCurrent && !isAtStation
                                                 ? "text-blue-600 font-extrabold animate-pulse"
@@ -171,8 +189,9 @@ export default function TrainRouteProgress({
                                         }`}>
                                         {station.ten_ga}
                                     </span>
-                                    <span className="text-[8px] text-gray-400 font-mono -mt-0.5">({station.ma_ga})</span>
+                                    <span className="text-[8px] text-gray-400 font-mono">({station.ma_ga})</span>
                                 </div>
+
                             </div>
                         );
                     })}
