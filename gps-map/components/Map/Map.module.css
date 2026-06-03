@@ -375,17 +375,3 @@
 .sidebarContent::-webkit-scrollbar-thumb:hover {
     background: #999;
 }
-
-.popupContent {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* nếu muốn căn giữa cả ngang */
-    /* thêm style khác nếu cần */
-}
-
-.generalInfo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}

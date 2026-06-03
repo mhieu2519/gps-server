@@ -443,7 +443,9 @@ export default function MapDashboard() {
                                             remove: () => setSelectedWagon(null)
                                         }}>
                                             <div className={styles.popupContent}>
-                                                <strong> <CiWavePulse1 className="text-2xl" /> Tàu: {id}</strong>
+                                                <strong className="flex items-center gap-2">
+                                                    <CiWavePulse1 className="text-2xl" /> Tàu: {id}
+                                                </strong>
                                                 <hr />
 
                                                 {/* Đồ họa đoàn tàu */}
@@ -486,9 +488,9 @@ export default function MapDashboard() {
                                                     </div>
                                                 ) : (
                                                     <div className={styles.generalInfo}>
-                                                        <p><IoSpeedometerOutline className="mr-2" /> Tốc độ: {devices[id].speed} km/h</p>
-                                                        <p><IoLocationOutline className="mr-2" /> {devices[id].lat.toFixed(4)}, {devices[id].lng.toFixed(4)}</p>
-                                                        <p><GiOldWagon className="mr-2" /> Số toa: {devices[id].danh_sach_toa?.length || 0} </p>
+                                                        <p className="flex items-center "><IoSpeedometerOutline className="mr-2" /> Tốc độ: {devices[id].speed} km/h</p>
+                                                        <p className="flex items-center "><IoLocationOutline className="mr-2" /> {devices[id].lat.toFixed(4)}, {devices[id].lng.toFixed(4)}</p>
+                                                        <p className="flex items-center "><GiOldWagon className="mr-2" /> Số toa: {devices[id].danh_sach_toa?.length || 0} </p>
                                                     </div>
                                                 )}
                                             </div>
