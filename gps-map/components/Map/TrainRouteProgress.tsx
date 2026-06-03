@@ -98,8 +98,8 @@ export default function TrainRouteProgress({
     const stationWidth = 68;
     const centerOffset = stationWidth / 2;
 
-    const timelineWidth = (totalStations - 1) * stationWidth;
-    const trackWidth = timelineWidth - centerOffset * 2;
+    const timelineWidth = totalStations * stationWidth;
+    const trackWidth = timelineWidth - stationWidth; // Đường ray chỉ chạy giữa các ga, không kéo dài ra ngoài ga đầu tiên và cuối cùng
 
     const progressWidth = (trackWidth * progressPercent) / 100;
 
@@ -121,10 +121,13 @@ export default function TrainRouteProgress({
             </div>
 
             {/* Khung cuộn ngang mượt mà, cấp thêm padding-bottom để không bị cắt chữ tên ga */}
-            <div className="w-full overflow-x-auto pb-6 pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="w-full overflow-x-auto pb-8 pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <div
                     className="relative flex items-center"
-                    style={{ width: `${timelineWidth + 40}px`, margin: '0 auto' }}
+                    style={{
+                        width: `${timelineWidth}px`,
+                        margin: "0 auto"
+                    }}
                 >
                     {/* Đường ray xám nền */}
                     <div
