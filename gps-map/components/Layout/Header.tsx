@@ -73,9 +73,12 @@ export default function Header() {
                                             <p className="text-sm font-bold text-gray-800 truncate mt-0.5">{session.user.name}</p>
                                             <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-bold mt-1 ${session.user.role === "admin"
                                                 ? "bg-amber-50 text-amber-600 border border-amber-200"
-                                                : "bg-cyan-50 text-cyan-600 border border-cyan-200"
+                                                : session.user.role === "supervisor"
+                                                    ? "bg-gray-50 text-cyan-600 border border-cyan-200"
+                                                    : "bg-cyan-50 text-cyan-600 border border-cyan-200"
+
                                                 }`}>
-                                                {session.user.role === "admin" ? "Quản trị viên" : "Thành viên"}
+                                                {session.user.role === "admin" ? "Quản trị viên" : session.user.role === "supervisor" ? "Giám sát ga" : "Thành viên"}
                                             </span>
                                         </div>
 
@@ -138,6 +141,7 @@ export default function Header() {
                                                     </Link>
                                                 </>
                                             )}
+                                            {/* cập nhật tại ga thêm cho giám sat ga */}
                                             {session.user.role === "supervisor" && (
                                                 <>
                                                     <Link
@@ -177,7 +181,7 @@ export default function Header() {
                         )}
                     </div>
                 </div>
-            </header>
+            </header >
 
             <LoginModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </>
