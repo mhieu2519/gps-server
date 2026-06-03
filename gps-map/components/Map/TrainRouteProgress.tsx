@@ -131,7 +131,7 @@ export default function TrainRouteProgress({
             {/* Thanh ngang lộ trình */}
             <div className="relative w-full mt-6 px-3 overflow-x-auto overflow-y-hidden flex items-center py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
-                <div className="relative flex items-center justify-between min-w-[1200px] w-full px-3">
+                <div className="relative flex items-center justify-between w-full px-8">
                     {/* Đường nối ray nền xám cố định */}
                     <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded -z-10"></div>
 
@@ -180,16 +180,16 @@ export default function TrainRouteProgress({
                                 {/* Tên Ga */}
                                 <div className="absolute top-7 flex flex-col items-center text-center w-full">
                                     <span className={`text-[10px] font-bold line-clamp-2 text-center block leading-tight transition-all ${isCurrent && isAtStation
-                                            ? "text-amber-600 font-extrabold"
-                                            : isCurrent && !isAtStation
-                                                ? "text-blue-600 font-extrabold animate-pulse"
-                                                : isPassed
-                                                    ? "text-blue-500"
-                                                    : "text-gray-400"
+                                        ? "text-amber-600 font-extrabold"
+                                        : isCurrent && !isAtStation
+                                            ? "text-blue-600 font-extrabold animate-pulse"
+                                            : isPassed
+                                                ? "text-blue-500"
+                                                : "text-gray-400"
                                         }`}>
                                         {station.ten_ga}
                                     </span>
-                                    <span className="text-[8px] text-gray-400 font-mono">({station.ma_ga})</span>
+
                                 </div>
 
                             </div>
@@ -199,7 +199,7 @@ export default function TrainRouteProgress({
             </div>
 
             {/* Tạo khoảng cách đệm phía dưới */}
-            <div className="h-6"></div>
+            <div className="h-3"></div>
         </div>
     );
 }
