@@ -1,10 +1,15 @@
 // gps-server/gps-map/middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const userRole = request.cookies.get('vai_tro')?.value;
+    const token = await getToken({
+        req: request,
+        secret: process.env.NEXTAUTH_SECRET
+    });
+    const userRole = token?.role;
 
     // Chặn tất cả những ai CHƯA ĐĂNG NHẬP muốn vào bất kỳ trang nào thuộc /admin
     if (pathname.startsWith('/admin') && !userRole) {
