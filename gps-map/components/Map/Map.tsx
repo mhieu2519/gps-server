@@ -17,6 +17,7 @@ import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
 import { io } from "socket.io-client";
 import SmoothTrainMarker from "./SmoothTrainMarker";
 import { FcMenu } from "react-icons/fc";
+import TrainRouteProgress from "./TrainRouteProgress";
 
 // Đăng ký plugin Leaflet
 L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling);
@@ -62,115 +63,6 @@ function MapController({ center, bounds }: { center: [number, number] | null, bo
         }
     }, [center, bounds, map]);
     return null;
-}
-// tính khoảng cách giữa 2 điểm (lat1, lng1) và (lat2, lng2) bằng công thức Haversine
-// Hàm tính khoảng cách giữa tọa độ tàu và ga (mét) để định vị tàu đang ở đâu
-function getHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371000; // Bán kính Trái Đất tính bằng mét
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-}
-
-interface StationDetails {
-    ma_ga: string;
-    ten_ga: string;
-    lat: number;
-    lng: number;
-}
-
-function TrainRouteProgress({
-    currentLat,
-    currentLng,
-    routeStations
-}: {
-    currentLat: number;
-    currentLng: number;
-    routeStations: StationDetails[]
-}) {
-    if (!routeStations || routeStations.length === 0) return null;
-
-    //Xác định xem tàu đang ở gần ga nào nhất dựa vào khoảng cách GPS
-    let closestStationIndex = 0;
-    let minDistance = Infinity;
-
-    routeStations.forEach((station, index) => {
-        const dist = getHaversineDistance(currentLat, currentLng, station.lat, station.lng);
-        if (dist < minDistance) {
-            minDistance = dist;
-            closestStationIndex = index;
-        }
-    });
-
-    // Nếu khoảng cách tới ga gần nhất < 800m thì coi như tàu đang đỗ/ở trong ga đó
-    const isAtStation = minDistance < 800;
-
-    return (
-        <div className="w-full bg-gray-50 p-4 rounded-xl border border-gray-200 my-3 select-none">
-            <div className="flex justify-between items-center mb-2">
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                    🛣️ Tiến độ lộ trình
-                </span>
-                <span className="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded border border-blue-200">
-                    {isAtStation
-                        ? `Đang ở: ${routeStations[closestStationIndex].ten_ga}`
-                        : `Sắp tới: ${routeStations[closestStationIndex].ten_ga}`}
-                </span>
-            </div>
-
-            {/* Thanh ngang lộ trình */}
-            <div className="relative flex items-center justify-between w-full mt-6 px-3">
-                {/* Đường nối ray nền xám cố định */}
-                <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded -z-10"></div>
-
-                {/* Đường tiến độ màu xanh (tự động chạy dài theo vị trí của tàu) */}
-                <div
-                    className="absolute left-4 top-1/2 -translate-y-1/2 h-1 bg-blue-500 rounded -z-10 transition-all duration-700 ease-out"
-                    style={{
-                        width: `${(closestStationIndex / (routeStations.length - 1)) * 100}%`,
-                        maxWidth: 'calc(100% - 32px)'
-                    }}
-                ></div>
-
-                {/* Vòng tròn các Ga */}
-                {routeStations.map((station, idx) => {
-                    const isPassed = idx < closestStationIndex;
-                    const isCurrent = idx === closestStationIndex;
-
-                    return (
-                        <div key={station.ma_ga} className="flex flex-col items-center relative">
-                            {/* Điểm nút ga */}
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] font-mono font-bold transition-all duration-500 ${isCurrent && isAtStation
-                                ? "bg-amber-500 border-amber-600 text-white scale-125 shadow-md animate-pulse"
-                                : isCurrent && !isAtStation
-                                    ? "bg-blue-500 border-blue-600 text-white scale-110 animate-bounce"
-                                    : isPassed
-                                        ? "bg-blue-500 border-blue-600 text-white"
-                                        : "bg-white border-gray-300 text-gray-400"
-                                }`}>
-                                {isCurrent ? "🚂" : idx + 1}
-                            </div>
-
-                            {/* Tên Ga chữ nhỏ ở dưới */}
-                            <div className="absolute top-7 flex flex-col items-center text-center">
-                                <span className={`text-[10px] font-bold max-w-[65px] truncate block ${isCurrent ? "text-amber-600 font-extrabold" : isPassed ? "text-blue-600" : "text-gray-500"
-                                    }`}>
-                                    {station.ten_ga}
-                                </span>
-                                <span className="text-[8px] text-gray-400 font-mono -mt-0.5">({station.ma_ga})</span>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-            {/* Tạo khoảng cách đệm phía dưới */}
-            <div className="h-6"></div>
-        </div>
-    );
 }
 
 export default function MapDashboard() {
@@ -609,13 +501,4 @@ export default function MapDashboard() {
         </div>
     );
 }
-
-
-
-
-
-
-
-
-
 
