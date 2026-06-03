@@ -96,7 +96,13 @@ export default function TrainRouteProgress({
 
     // Định dạng độ rộng cố định cho mỗi phân đoạn ga để chống dồn chữ khi cuộn ngang
     const stationWidth = 68;
+    const centerOffset = stationWidth / 2;
+
     const timelineWidth = (totalStations - 1) * stationWidth;
+    const trackWidth = timelineWidth - centerOffset * 2;
+
+    const progressWidth = (trackWidth * progressPercent) / 100;
+
     return (
         <div className="w-full bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm my-3 select-none">
             {/* Header trạng thái */}
@@ -123,16 +129,21 @@ export default function TrainRouteProgress({
                     {/* Đường ray xám nền */}
                     <div
                         className="absolute h-1 bg-gray-100 rounded z-0"
-                        style={{ left: '20px', right: '20px', top: '16px' }}
+                        style={{
+                            left: `${centerOffset}px`,
+                            // right: `${centerOffset}px`,
+                            width: `${trackWidth}px`,
+                            top: '12px'
+                        }}
                     ></div>
 
                     {/* Thanh tiến độ màu xanh chạy động */}
                     <div
                         className="absolute h-1 bg-blue-500 rounded z-10 transition-all duration-700 ease-out"
                         style={{
-                            left: '20px',
-                            top: '16px',
-                            width: `calc(${progressPercent}% - ${progressPercent * 40 / 100}px)`
+                            left: `${centerOffset}px`,
+                            top: '12px',
+                            width: `${progressWidth}px`
                         }}
                     ></div>
 
