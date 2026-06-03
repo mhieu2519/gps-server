@@ -186,7 +186,7 @@
 }
 
 .locomotive {
-    width: 45px;
+    width: 50px;
     height: 28px;
     background-color: #0076ba;
     border-radius: 4px 12px 4px 4px;
@@ -194,7 +194,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: bold;
 }
 

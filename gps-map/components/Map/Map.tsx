@@ -18,6 +18,10 @@ import { io } from "socket.io-client";
 import SmoothTrainMarker from "./SmoothTrainMarker";
 import { FcMenu } from "react-icons/fc";
 import TrainRouteProgress from "./TrainRouteProgress";
+import { IoSpeedometerOutline, IoLocationOutline } from "react-icons/io5";
+import { GiOldWagon } from "react-icons/gi";
+import { MdOutlineSatelliteAlt } from "react-icons/md";
+import { CiWavePulse1 } from "react-icons/ci";
 
 // Đăng ký plugin Leaflet
 L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling);
@@ -439,7 +443,7 @@ export default function MapDashboard() {
                                             remove: () => setSelectedWagon(null)
                                         }}>
                                             <div className={styles.popupContent}>
-                                                <strong>📡 Tàu: {id}</strong>
+                                                <strong> <CiWavePulse1 className="text-2xl" /> Tàu: {id}</strong>
                                                 <hr />
 
                                                 {/* Đồ họa đoàn tàu */}
@@ -482,9 +486,9 @@ export default function MapDashboard() {
                                                     </div>
                                                 ) : (
                                                     <div className={styles.generalInfo}>
-                                                        <p>🚀 Tốc độ: {devices[id].speed} km/h</p>
-                                                        <p>📍 {devices[id].lat.toFixed(4)}, {devices[id].lng.toFixed(4)}</p>
-                                                        <p>📦 Số toa: {devices[id].danh_sach_toa?.length || 0} </p>
+                                                        <p><IoSpeedometerOutline /> Tốc độ: {devices[id].speed} km/h</p>
+                                                        <p><IoLocationOutline /> {devices[id].lat.toFixed(4)}, {devices[id].lng.toFixed(4)}</p>
+                                                        <p><GiOldWagon /> Số toa: {devices[id].danh_sach_toa?.length || 0} </p>
                                                     </div>
                                                 )}
                                             </div>
