@@ -133,14 +133,14 @@ export default function TrainRouteProgress({
 
                 <div className="relative flex items-center justify-between w-full px-8">
                     {/* Đường nối ray nền xám cố định */}
-                    <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded -z-10"></div>
+                    <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded z-0"></div>
 
                     {/* Đường tiến độ màu xanh chạy MƯỢT MÀ theo vị trí thực của tàu */}
                     <div
-                        className="absolute left-4 top-1/2 -translate-y-1/2 h-1 bg-blue-500 rounded -z-10 transition-all duration-700 ease-out"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 h-1 bg-blue-500 rounded -z-10 transition-all duration-700 ease-out z-20"
                         style={{
                             width: `${progressPercent}%`,
-                            maxWidth: 'calc(100% - 32px)'
+                            // maxWidth: 'calc(100% - 32px)'
                         }}
                     ></div>
 
