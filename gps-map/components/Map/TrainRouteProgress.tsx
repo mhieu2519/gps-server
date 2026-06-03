@@ -165,7 +165,7 @@ export default function TrainRouteProgress({
                                 key={station.ma_ga}
                                 ref={isCurrent ? currentStationRef : null}
                                 className="flex flex-col items-center relative flex-shrink-0 "
-
+                                style={{ minWidth: '64px' }}
                             >
                                 {/* Điểm nút ga */}
                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] font-mono font-bold transition-all duration-500 ${isCurrent && isAtStation
