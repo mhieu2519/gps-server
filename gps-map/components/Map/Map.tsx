@@ -486,9 +486,9 @@ export default function MapDashboard() {
                                                     </div>
                                                 ) : (
                                                     <div className={styles.generalInfo}>
-                                                        <p><IoSpeedometerOutline /> Tốc độ: {devices[id].speed} km/h</p>
-                                                        <p><IoLocationOutline /> {devices[id].lat.toFixed(4)}, {devices[id].lng.toFixed(4)}</p>
-                                                        <p><GiOldWagon /> Số toa: {devices[id].danh_sach_toa?.length || 0} </p>
+                                                        <p><IoSpeedometerOutline className="mr-2" /> Tốc độ: {devices[id].speed} km/h</p>
+                                                        <p><IoLocationOutline className="mr-2" /> {devices[id].lat.toFixed(4)}, {devices[id].lng.toFixed(4)}</p>
+                                                        <p><GiOldWagon className="mr-2" /> Số toa: {devices[id].danh_sach_toa?.length || 0} </p>
                                                     </div>
                                                 )}
                                             </div>
