@@ -19,7 +19,7 @@ export const authOptions: AuthOptions = {
 
                 const { username, password } = credentials;
 
-                // CƠ CHẾ 1: Kiểm tra quyền ADMIN tối cao từ file .env trước
+                //  Kiểm tra quyền ADMIN tối cao từ file .env trước
                 if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
                     return {
                         id: "admin-id",
@@ -29,7 +29,7 @@ export const authOptions: AuthOptions = {
                 }
 
                 try {
-                    // CƠ CHẾ 2: Kiểm tra tài khoản USER trong Database Postgres (Khớp 100% với cấu trúc bảng mới)
+                    // Kiểm tra tài khoản USER trong Database Postgres (Khớp 100% với cấu trúc bảng mới)
                     const queryText = "SELECT * FROM tai_khoan WHERE ten_dang_nhap = $1 LIMIT 1";
                     const result = await db.query(queryText, [username]);
 

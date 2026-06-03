@@ -138,6 +138,21 @@ export default function Header() {
                                                     </Link>
                                                 </>
                                             )}
+                                            {session.user.role === "supervisor" && (
+                                                <>
+                                                    <Link
+                                                        href="/admin/station/update"
+                                                        onClick={() => setIsDropdownOpen(false)}
+                                                        className="flex items-center px-4 py-2.5 text-sm text-cyan-600 bg-cyan-50/50 hover:bg-cyan-50 font-bold transition"
+                                                    >
+                                                        <CgPushUp />
+                                                        <span className="ml-2">
+                                                            Cập nhật tại ga
+                                                        </span>
+                                                    </Link>
+                                                </>
+
+                                            )}
                                         </div>
 
                                         {/* Đăng xuất */}

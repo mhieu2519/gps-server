@@ -1,3 +1,5 @@
+// gps-server/gps-map/app/admin/station/update/page.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
