@@ -207,13 +207,18 @@ export default function DispatchAdmin() {
 
     // Lưu cấu hình lập đoàn tàu và cập nhật trạng thái
     const handleSaveLayout = async () => {
+        if (!trainHead || !selectedRoute) {
+            toast.warning("Vui lòng nhập đủ thông tin!");
+            return;
+        }
+
         try {
             const response = await fetch("/api/dispatch/save-layout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     selectedTrip,
-                    trainHead, // Lưu mã đầu máy (có thể đã chỉnh sửa thủ công nếu đổi đầu máy đứt xích)
+                    trainHead, // Lưu mã đầu máy
                     ma_lo_trinh: selectedRoute,
                     layout: trainLayout
                 })
