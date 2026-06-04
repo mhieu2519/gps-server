@@ -13,8 +13,7 @@ import { LiaOpencart } from "react-icons/lia";
 import { GiBunkBeds } from "react-icons/gi";
 import { PiArmchairLight } from "react-icons/pi";
 import { IoMdAddCircleOutline } from "react-icons/io";
-import { FcDataConfiguration } from "react-icons/fc";
-import { FcOk } from "react-icons/fc";
+import { FcDataConfiguration } from "react-icons/fc"
 import { toast } from 'react-toastify';
 // Interface cấu trúc Toa xe
 interface Carriage {
@@ -222,10 +221,7 @@ export default function DispatchAdmin() {
 
             if (response.ok) {
                 toast.success(
-                    `[DATABASE] Đã cập nhật đầu máy [${trainHead}] & gán lộ trình thành công cho chuyến ${selectedTrip}!`,
-                    {
-                        icon: <FcOk />,
-                    }
+                    ` Đã cập nhật đầu máy [${trainHead}] và lộ trình cho chuyến ${selectedTrip}!`,
                 );
                 // Cập nhật lại state local danh sách trips để đồng bộ giao diện ngay lập tức
                 setTrips(prev => prev.map(t => t.ma_chuyen_di === selectedTrip ? { ...t, ma_dau_may: trainHead, ma_lo_trinh: selectedRoute } : t));
@@ -249,7 +245,7 @@ export default function DispatchAdmin() {
 
     const handleSaveNewRoute = async () => {
         if (!newRouteCode || !newRouteName || selectedStations.length === 0) {
-            toast.error("Vui lòng nhập đủ thông tin và chọn ít nhất 1 ga hành trình!");
+            toast.warning("Vui lòng nhập đủ thông tin!");
             return;
         }
 

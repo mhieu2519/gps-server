@@ -227,7 +227,7 @@ export default function MapDashboard() {
                         </button>
 
                         <div className={styles.sidebarHeader}>
-                            <h2>Hệ thống Đường Sắt</h2>
+                            {/* <h2>Hệ thống Đường Sắt</h2>*/}
                         </div>
                         {/* Thanh điều hướng Tab */}
                         <div className={styles.tabHeaders}>
@@ -235,20 +235,20 @@ export default function MapDashboard() {
                                 className={`flex items-center ${styles.tabBtn} ${activeTab === 'live' ? styles.tabActive : ""}`}
                                 onClick={() => setActiveTab('live')}
                             >
-                                <MdOutlineSatelliteAlt className="mr-2" /> Trực tuyến
+                                <MdOutlineSatelliteAlt className="mr-2 text-2xl" /> Trực tuyến
                             </button>
                             <button
                                 className={`flex items-center ${styles.tabBtn} ${activeTab === 'history' ? styles.tabActive : ""}`}
                                 onClick={() => setActiveTab('history')}
                             >
-                                <FcClock className="mr-2" /> Lịch sử
+                                <FcClock className="mr-2 text-2xl" /> Lịch sử
                             </button>
                         </div>
                         <div className={styles.sidebarContent}>
                             {/* Danh sách tàu trực tuyến */}
                             {activeTab === 'live' && (
                                 <div className={styles.sidebarSection}>
-                                    <h3 className={styles.sectionTitle}><FcElectricalSensor className="mr-2" /> Đang hoạt động ({Object.keys(devices).length})</h3>
+                                    <h3 className={` flex items-center ${styles.sectionTitle}`}><FcElectricalSensor className="mr-2 text-xl" /> Đang hoạt động ({Object.keys(devices).length})</h3>
                                     <div className={styles.deviceList}>
                                         {Object.keys(devices).length > 0 ? (
 
@@ -266,7 +266,7 @@ export default function MapDashboard() {
                                                     }}
                                                 >
                                                     <div className={`flex items-center ${styles.deviceName}`}>
-                                                        <FcNeutralTrading className="mr-2" />{id}
+                                                        <FcNeutralTrading className="mr-2 text-xl" />{id}
                                                     </div>
                                                     <div className={styles.deviceInfo}>
                                                         <span className="flex items-center"><IoSpeedometerOutline className="mr-2" /> Tốc độ: <b>{devices[id].speed ?? 0}</b> km/h</span>
@@ -287,7 +287,7 @@ export default function MapDashboard() {
                                 <div className={styles.sidebarSection}>
                                     {/* <h3 className={'flex items-center ' + styles.sectionTitle}>*/}
                                     <h3 className={`flex items-center ${styles.sectionTitle}`}>
-                                        <FcTimeline className="mr-2" />Danh sách chuyến đi</h3>
+                                        <FcTimeline className="mr-2 text-xl" />Danh sách chuyến đi</h3>
                                     <div className={styles.filterContainer}>
                                         {/*<label>Chọn ngày xem:</label>*/}
                                         <input
@@ -341,7 +341,8 @@ export default function MapDashboard() {
                         </div>
                     </div>
                 </>
-            )}
+            )
+            }
             {/* modal đăng nhập */}
             <LoginModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
@@ -528,7 +529,7 @@ export default function MapDashboard() {
                     <MapController center={selectedDevicePos} bounds={mapBounds} />
                 </MapContainer>
             </div>
-        </div>
+        </div >
     );
 }
 
