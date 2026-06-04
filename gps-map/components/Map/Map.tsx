@@ -22,6 +22,12 @@ import { IoSpeedometerOutline, IoLocationOutline } from "react-icons/io5";
 import { GiOldWagon } from "react-icons/gi";
 import { MdOutlineSatelliteAlt } from "react-icons/md";
 import { CiWavePulse1 } from "react-icons/ci";
+import { FcClock } from "react-icons/fc";// lich su
+import { FcTimeline } from "react-icons/fc"; // danh sach chuyen di
+import { FcHighBattery } from "react-icons/fc";
+import { FcElectricalSensor } from "react-icons/fc";
+import { FcNeutralTrading } from "react-icons/fc";
+import { FcCancel } from "react-icons/fc";
 
 // Đăng ký plugin Leaflet
 L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling);
@@ -226,23 +232,23 @@ export default function MapDashboard() {
                         {/* Thanh điều hướng Tab */}
                         <div className={styles.tabHeaders}>
                             <button
-                                className={`${styles.tabBtn} ${activeTab === 'live' ? styles.tabActive : ""}`}
+                                className={`flex items-center ${styles.tabBtn} ${activeTab === 'live' ? styles.tabActive : ""}`}
                                 onClick={() => setActiveTab('live')}
                             >
-                                📡 Trực tuyến
+                                <MdOutlineSatelliteAlt className="mr-2" /> Trực tuyến
                             </button>
                             <button
-                                className={`${styles.tabBtn} ${activeTab === 'history' ? styles.tabActive : ""}`}
+                                className={`flex items-center ${styles.tabBtn} ${activeTab === 'history' ? styles.tabActive : ""}`}
                                 onClick={() => setActiveTab('history')}
                             >
-                                🕑 Lịch sử
+                                <FcClock className="mr-2" /> Lịch sử
                             </button>
                         </div>
                         <div className={styles.sidebarContent}>
                             {/* Danh sách tàu trực tuyến */}
                             {activeTab === 'live' && (
                                 <div className={styles.sidebarSection}>
-                                    <h3 className={styles.sectionTitle}>📡 Đang hoạt động ({Object.keys(devices).length})</h3>
+                                    <h3 className={styles.sectionTitle}><FcElectricalSensor className="mr-2" /> Đang hoạt động ({Object.keys(devices).length})</h3>
                                     <div className={styles.deviceList}>
                                         {Object.keys(devices).length > 0 ? (
 
@@ -259,10 +265,12 @@ export default function MapDashboard() {
                                                         }
                                                     }}
                                                 >
-                                                    <div className={styles.deviceName}>🚅 {id}</div>
+                                                    <div className={`flex items-center ${styles.deviceName}`}>
+                                                        <FcNeutralTrading className="mr-2" />{id}
+                                                    </div>
                                                     <div className={styles.deviceInfo}>
-                                                        <span>🚀Tốc độ: <b>{devices[id].speed ?? 0}</b> km/h</span>
-                                                        <p><span>🔋Pin: {devices[id].battery}%</span> </p>
+                                                        <span className="flex items-center"><IoSpeedometerOutline className="mr-2" /> Tốc độ: <b>{devices[id].speed ?? 0}</b> km/h</span>
+                                                        <p><span className="flex items-center"><FcHighBattery className="mr-2" /> Pin: {devices[id].battery}%</span> </p>
                                                     </div>
                                                 </div>
                                             ))
@@ -277,8 +285,9 @@ export default function MapDashboard() {
 
                             {activeTab === 'history' && (
                                 <div className={styles.sidebarSection}>
-                                    <h3 className={styles.sectionTitle}>
-                                        🚞 Danh sách chuyến đi</h3>
+                                    {/* <h3 className={'flex items-center ' + styles.sectionTitle}>*/}
+                                    <h3 className={`flex items-center ${styles.sectionTitle}`}>
+                                        <FcTimeline className="mr-2" />Danh sách chuyến đi</h3>
                                     <div className={styles.filterContainer}>
                                         {/*<label>Chọn ngày xem:</label>*/}
                                         <input
@@ -305,8 +314,8 @@ export default function MapDashboard() {
                                             <div className={styles.sessionTime}>
                                                 🕒 {new Date(s.bat_dau * 1000).toLocaleTimeString()} - {new Date(s.ket_thuc * 1000).toLocaleTimeString()}
                                             </div>*/}
-                                                    <div className={styles.sessionTime}>
-                                                        🕒 {
+                                                    <div className={` flex items-center ${styles.sessionTime}`}>
+                                                        <FcClock className="mr-2" /> {
                                                             isNaN(Number(s.bat_dau)) || Number(s.bat_dau) < 0 ? "Không rõ" :
                                                                 new Date(Number(s.bat_dau) * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
                                                         }
@@ -319,7 +328,7 @@ export default function MapDashboard() {
                                                 </div>
                                             ))
                                         ) : (
-                                            <p className={styles.emptyText}> 🚫 Chưa có dữ liệu lịch sử</p>
+                                            <p className={` flex items-center ${styles.emptyText}`}> <FcCancel className="mr-2" /> Chưa có dữ liệu lịch sử</p>
                                         )}
                                     </div>
                                     {activeSessionPath && (
@@ -333,7 +342,7 @@ export default function MapDashboard() {
                     </div>
                 </>
             )}
-            {/* Modal đăng nhập */}
+            {/* modal đăng nhập */}
             <LoginModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
             {/* khu vực bản đồ */}

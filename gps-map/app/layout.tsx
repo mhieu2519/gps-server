@@ -5,6 +5,8 @@ import "leaflet/dist/leaflet.css";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import NextAuthProvider from "@/components/provider/NextAuthProvider";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +38,11 @@ export default function RootLayout({
           <Header />
           <main className="flex-grow pt-16 pb-10">
             {children}
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              theme="colored"
+            />
           </main>
           <Footer />
         </NextAuthProvider>

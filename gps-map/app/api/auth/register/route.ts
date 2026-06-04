@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 
 export async function POST(request: Request) {
     try {
-        // 1. Đọc dữ liệu user và passwd từ body mà Popup gửi lên
+        // Đọc dữ liệu user và passwd từ body mà Popup gửi lên
         const { user, passwd } = await request.json();
 
         // Kiểm tra dữ liệu đầu vào xem có bị trống không
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
             );
         }
 
-        // 2. Kết nối CSDL kiểm tra xem tài khoản này đã được đăng ký chưa
+        // Kết nối CSDL kiểm tra xem tài khoản này đã được đăng ký chưa
         const checkQuery = "SELECT * FROM tai_khoan WHERE ten_dang_nhap = $1 LIMIT 1";
         const checkResult = await db.query(checkQuery, [user]);
 
@@ -27,11 +27,11 @@ export async function POST(request: Request) {
             );
         }
 
-        // 3. Mã hóa mật khẩu một chiều bằng bcrypt với saltRounds = 10 để bảo mật tuyệt đối
+        // Mã hóa mật khẩu một chiều bằng bcrypt với saltRounds = 10
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(passwd, saltRounds);
 
-        // 4. Chèn dữ liệu tài khoản mới vào bảng tai_khoan trong DBeaver
+        // Chèn dữ liệu tài khoản mới vào bảng tai_khoan trong DBeaver
         // Cột 'role' gán cứng giá trị là 'user', cột 'lastTime' tạm thời để NULL
         const insertQuery = `
             INSERT INTO tai_khoan (ten_dang_nhap, mat_khau, vai_tro,ma_ga, "lastTime") 
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         `;
         await db.query(insertQuery, [user, hashedPassword, "user", null]);
 
-        // 5. Trả kết quả thành công về cho Popup
+        //  Trả kết quả thành công về cho Popup
         return NextResponse.json(
             { message: "Đăng ký tài khoản thành công!" },
             { status: 201 }
