@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         // Chèn dữ liệu tài khoản mới vào bảng tai_khoan trong DBeaver
         // Cột 'role' gán cứng giá trị là 'user', cột 'lastTime' tạm thời để NULL
         const insertQuery = `
-            INSERT INTO tai_khoan (ten_dang_nhap, mat_khau, vai_tro,ma_ga, "lastTime") 
+            INSERT INTO tai_khoan (ten_dang_nhap, mat_khau, vai_tro, ma_ga, "lastTime") 
             VALUES ($1, $2, $3, $4, NOW())
         `;
         await db.query(insertQuery, [user, hashedPassword, "user", null]);

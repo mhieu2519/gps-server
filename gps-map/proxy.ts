@@ -1,9 +1,12 @@
-// gps-server/gps-map/middleware.ts
+// gps-server/gps-map/proxy.ts
+// ở bản mới middleware.ts đã được đổi tên thành proxy.ts để tránh nhầm lẫn với middleware của Express hoặc các framework khác. 
+// Về cơ bản, chức năng vẫn giữ nguyên là làm nhiệm vụ trung gian (proxy) để kiểm tra quyền truy cập trước khi cho phép vào các trang admin.
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = await getToken({
         req: request,
