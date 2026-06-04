@@ -251,13 +251,17 @@ export default function MapDashboard() {
                                                     key={id}
                                                     className={styles.deviceItem}
                                                     onClick={() => {
-                                                        setSelectedDevicePos([devices[id].lat, devices[id].lng]);
-                                                        setMapBounds(null); // Ưu tiên FlyTo vị trí tàu
+                                                        const dv = devices[id];
+                                                        if (dv.lat != null && dv.lng != null) {
+                                                            setSelectedDevicePos([dv.lat, dv.lng]);
+                                                            setMapBounds(null); // Ưu tiên FlyTo vị trí tàu
+
+                                                        }
                                                     }}
                                                 >
                                                     <div className={styles.deviceName}>🚅 {id}</div>
                                                     <div className={styles.deviceInfo}>
-                                                        <span>🚀Tốc độ: <b>{devices[id].speed}</b> km/h</span>
+                                                        <span>🚀Tốc độ: <b>{devices[id].speed ?? 0}</b> km/h</span>
                                                         <p><span>🔋Pin: {devices[id].battery}%</span> </p>
                                                     </div>
                                                 </div>
@@ -421,82 +425,93 @@ export default function MapDashboard() {
                         {/* Lớp hiển thị Tàu Realtime */}
                         <LayersControl.Overlay checked name="Vị trí tàu tức thời">
                             <LayerGroup>
-                                {Object.keys(devices).map((id) => (
-                                    <SmoothTrainMarker
-                                        key={id}
-                                        targetPosition={[devices[id].lat, devices[id].lng]}
-                                        heading={devices[id].heading}
-                                        duration={2000}
-                                        icon={trainIcon}
-                                    >
-
-
-                                        <Tooltip
-                                            permanent
-                                            direction="right"
-                                            offset={[10, 0]}
-                                            className={styles.trainLabel}
+                                {Object.keys(devices).map((id) => {
+                                    const device = devices[id];
+                                    // bỏ qua do bi crash nếu có tàu nào đó bị thiếu tọa độ
+                                    if (!device.lat || !device.lng) return null;
+                                    return (
+                                        <SmoothTrainMarker
+                                            key={id}
+                                            targetPosition={[devices[id].lat, devices[id].lng]}
+                                            heading={devices[id].heading}
+                                            duration={2000}
+                                            icon={trainIcon}
                                         >
-                                            {id}
-                                        </Tooltip>
-                                        <Popup minWidth={320} eventHandlers={{
-                                            remove: () => setSelectedWagon(null)
-                                        }}>
-                                            <div className={styles.popupContent}>
-                                                <strong className="flex items-center gap-2">
-                                                    <CiWavePulse1 className="text-2xl" /> Tàu: {id}
-                                                </strong>
-                                                <hr />
 
-                                                {/* Đồ họa đoàn tàu */}
-                                                <div className={styles.trainComposition}>
-                                                    <div className={`${styles.locomotive} ${!selectedWagon ? styles.locomotiveActive : ''}`}
-                                                        onClick={() => setSelectedWagon(null)}>
-                                                        {id}
-                                                    </div>
-                                                    {[...(devices[id].danh_sach_toa || [])].map((toa: any, idx: number) => (
-                                                        <div
-                                                            key={toa.ma_toa}
-                                                            className={`${styles.wagon} ${toa.kieu_cho === 'Vip' ? styles.wagonVip : ''} ${selectedWagon?.ma_toa === toa.ma_toa ? styles.wagonActive : ''}`}
-                                                            onClick={() => setSelectedWagon(toa)}
-                                                        >
-                                                            {idx + 1}
+
+                                            <Tooltip
+                                                permanent
+                                                direction="right"
+                                                offset={[10, 0]}
+                                                className={styles.trainLabel}
+                                            >
+                                                {id}
+                                            </Tooltip>
+                                            <Popup minWidth={320} eventHandlers={{
+                                                remove: () => setSelectedWagon(null)
+                                            }}>
+                                                <div className={styles.popupContent}>
+                                                    <strong className="flex items-center gap-2">
+                                                        <CiWavePulse1 className="text-2xl" /> Tàu: {id}
+                                                    </strong>
+                                                    <hr />
+
+                                                    {/* Đồ họa đoàn tàu */}
+                                                    <div className={styles.trainComposition}>
+                                                        <div className={`${styles.locomotive} ${!selectedWagon ? styles.locomotiveActive : ''}`}
+                                                            onClick={() => setSelectedWagon(null)}>
+                                                            {id}
                                                         </div>
-                                                    ))}
+                                                        {[...(devices[id].danh_sach_toa || [])].map((toa: any, idx: number) => (
+                                                            <div
+                                                                key={toa.ma_toa}
+                                                                className={`${styles.wagon} ${toa.kieu_cho === 'Vip' ? styles.wagonVip : ''} ${selectedWagon?.ma_toa === toa.ma_toa ? styles.wagonActive : ''}`}
+                                                                onClick={() => setSelectedWagon(toa)}
+                                                            >
+                                                                {idx + 1}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {devices[id].danh_sach_ga_chi_tiet && devices[id].danh_sach_ga_chi_tiet.length > 0 && (
+                                                        <TrainRouteProgress
+                                                            currentLat={devices[id].lat}
+                                                            currentLng={devices[id].lng}
+                                                            routeStations={devices[id].danh_sach_ga_chi_tiet}
+                                                        />
+                                                    )}
+
+
+                                                    {/* Chi tiết tàu */}
+                                                    {selectedWagon ? (
+                                                        <div className={styles.wagonDetailBox}>
+                                                            <b>Toa: {selectedWagon.ma_toa}</b> ({selectedWagon.loai_toa})
+                                                            <div className={styles.wagonDetailGrid}>
+                                                                <span>Kiểu: {selectedWagon.kieu_cho}</span>
+                                                                <span>Tải: {selectedWagon.tai_trong}/{selectedWagon.suc_chua_toi_da}</span>
+                                                            </div>
+                                                            <div className={styles.loadBarBg}>
+                                                                <div className={styles.loadBarFill} style={{ width: `${(selectedWagon.tai_trong / (selectedWagon.suc_chua_toi_da || 100)) * 100}%` }}></div>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className={styles.generalInfo}>
+                                                            <p className="flex items-center "><IoSpeedometerOutline className="mr-2" /> Tốc độ: {devices[id].speed ?? 0} km/h</p>
+                                                            {/*lỗi */}
+                                                            {/*  <p className="flex items-center "><IoLocationOutline className="mr-2" /> {devices[id].lat.toFixed(4)}, {devices[id].lng.toFixed(4)}</p> */}
+                                                            <p className="flex items-center">
+                                                                <IoLocationOutline className="mr-2" />
+                                                                {device.lat != null ? device.lat.toFixed(4) : 'N/A'},&nbsp;
+                                                                {device.lng != null ? device.lng.toFixed(4) : 'N/A'}
+                                                            </p>
+                                                            <p className="flex items-center "><GiOldWagon className="mr-2" /> Số toa: {devices[id].danh_sach_toa?.length ?? 0} </p>
+                                                        </div>
+                                                    )}
                                                 </div>
-
-                                                {devices[id].danh_sach_ga_chi_tiet && devices[id].danh_sach_ga_chi_tiet.length > 0 && (
-                                                    <TrainRouteProgress
-                                                        currentLat={devices[id].lat}
-                                                        currentLng={devices[id].lng}
-                                                        routeStations={devices[id].danh_sach_ga_chi_tiet}
-                                                    />
-                                                )}
-
-
-                                                {/* Chi tiết tàu */}
-                                                {selectedWagon ? (
-                                                    <div className={styles.wagonDetailBox}>
-                                                        <b>Toa: {selectedWagon.ma_toa}</b> ({selectedWagon.loai_toa})
-                                                        <div className={styles.wagonDetailGrid}>
-                                                            <span>Kiểu: {selectedWagon.kieu_cho}</span>
-                                                            <span>Tải: {selectedWagon.tai_trong}/{selectedWagon.suc_chua_toi_da}</span>
-                                                        </div>
-                                                        <div className={styles.loadBarBg}>
-                                                            <div className={styles.loadBarFill} style={{ width: `${(selectedWagon.tai_trong / (selectedWagon.suc_chua_toi_da || 100)) * 100}%` }}></div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className={styles.generalInfo}>
-                                                        <p className="flex items-center "><IoSpeedometerOutline className="mr-2" /> Tốc độ: {devices[id].speed} km/h</p>
-                                                        <p className="flex items-center "><IoLocationOutline className="mr-2" /> {devices[id].lat.toFixed(4)}, {devices[id].lng.toFixed(4)}</p>
-                                                        <p className="flex items-center "><GiOldWagon className="mr-2" /> Số toa: {devices[id].danh_sach_toa?.length || 0} </p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </Popup>
-                                    </SmoothTrainMarker>
-                                ))}
+                                            </Popup>
+                                        </SmoothTrainMarker>
+                                    );
+                                })}
                             </LayerGroup>
                         </LayersControl.Overlay>
                     </LayersControl>

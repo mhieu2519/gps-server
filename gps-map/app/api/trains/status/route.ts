@@ -66,6 +66,7 @@ export async function GET() {
         ) AS danh_sach_ga_chi_tiet
 
     FROM tau t
+    WHERE t.lat IS NOT NULL AND t.lng IS NOT NULL
 `);
 
         // Chuyển mảng kết quả thành Object Map (Key là ma_tau)
