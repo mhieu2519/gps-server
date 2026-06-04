@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { toast } from 'react-toastify';
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -28,9 +29,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         setLoading(false);
 
         if (result?.error) {
-            alert("❌ Tài khoản hoặc mật khẩu không chính xác!");
+            toast.error("Tài khoản hoặc mật khẩu không chính xác!");
         } else {
-            alert("🎉 Đăng nhập thành công!");
+            toast.success("Đăng nhập thành công!");
             onClose(); // Đóng popup
             window.location.reload(); // Tải lại trang để cập nhật Header và Bản đồ
         }
@@ -49,14 +50,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             setLoading(false);
 
             if (res.ok) {
-                alert("Đăng ký thành công!");
+                toast.success("Đăng ký thành công!");
                 setIsLogin(true);
             } else {
-                alert(`❌ Lỗi: ${data.message}`);
+                toast.error(` Lỗi: ${data.message}`);
             }
         } catch (error) {
             setLoading(false);
-            alert("❌ Lỗi kết nối máy chủ!");
+            toast.error(" Lỗi kết nối máy chủ!");
         }
     };
 
