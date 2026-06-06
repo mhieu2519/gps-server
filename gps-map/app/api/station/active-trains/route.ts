@@ -59,20 +59,35 @@ export async function GET() {
              WHERE tk.ten_dang_nhap = $1`,
             [username]
         );
+        // Admin không có ma_ga → dùng ga đầu tiên có tàu, hoặc cho chọn
+        const isAdmin = role === "admin";
 
-        if (accountRes.rows.length === 0) {
-            return NextResponse.json(
-                { error: "Tài khoản chưa được gán ga hoặc ga không tồn tại." },
-                { status: 400 }
-            );
-        }
+        let ma_ga: string, gaLat: number, gaLng: number, ten_ga: string;
 
-        const { ma_ga, lat: gaLat, lng: gaLng, ten_ga } = accountRes.rows[0];
-        if (!gaLat || !gaLng) {
-            return NextResponse.json(
-                { error: "Ga chưa có tọa độ trong hệ thống." },
-                { status: 400 }
+        if (accountRes.rows.length === 0 || !accountRes.rows[0].ma_ga) {
+            if (!isAdmin) {
+                return NextResponse.json(
+                    { error: "Tài khoản chưa được gán ga hoặc ga không tồn tại." },
+                    { status: 400 }
+                );
+            }
+            // Admin không có ma_ga → lấy ga đầu tiên trong DB để làm điểm tham chiếu mặc định
+            const defaultGaRes = await db.query(
+                `SELECT ma_ga, ten_ga, ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng
+         FROM ga WHERE geom IS NOT NULL LIMIT 1`
             );
+            if (defaultGaRes.rows.length === 0) {
+                return NextResponse.json({ error: "Không có ga nào trong hệ thống." }, { status: 400 });
+            }
+            ({ ma_ga, ten_ga, lat: gaLat, lng: gaLng } = defaultGaRes.rows[0]);
+        } else {
+            ({ ma_ga, ten_ga, lat: gaLat, lng: gaLng } = accountRes.rows[0]);
+            if (!gaLat || !gaLng) {
+                return NextResponse.json(
+                    { error: "Ga chưa có tọa độ trong hệ thống." },
+                    { status: 400 }
+                );
+            }
         }
 
         // Lấy toàn bộ tàu đang có tọa độ 
@@ -82,10 +97,21 @@ export async function GET() {
 
         // Lọc tàu trong bán kính DETECTION_RADIUS_M 
         const trainsInRadius: string[] = [];
-        for (const row of tauRes.rows) {
-            const dist = haversineDistance(gaLat, gaLng, Number(row.lat), Number(row.lng));
-            if (dist <= DETECTION_RADIUS_M) {
+
+        if (isAdmin && !accountRes.rows[0]?.ma_ga) {
+            // Admin không gắn ga → hiển thị TẤT CẢ tàu đang có tọa độ
+            for (const row of tauRes.rows) {
                 trainsInRadius.push(row.ma_tau);
+            }
+        } else {
+            for (const row of tauRes.rows) {
+                const dist = haversineDistance(gaLat, gaLng, Number(row.lat), Number(row.lng));
+                if (!isAdmin || accountRes.rows[0]?.ma_ga) {
+                    if (dist > DETECTION_RADIUS_M) continue;
+                }
+                if (dist <= DETECTION_RADIUS_M) {
+                    trainsInRadius.push(row.ma_tau);
+                }
             }
         }
 
