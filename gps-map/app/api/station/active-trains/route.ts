@@ -126,11 +126,10 @@ export async function GET(request: Request) {
         let windowClosesAt: Date | null = null;
 
         if (isGlobalAdmin) {
-            // Admin global: cửa sổ luôn mở khi có tàu nào đó đang chạy
-            isWindowOpen = trainsInRadius.length > 0;
-            if (isWindowOpen) {
-                windowClosesAt = new Date(now.getTime() + WINDOW_GRACE_MS);
-            }
+            // Admin global: cửa sổ LUÔN MỞ, không giới hạn thời gian
+            isWindowOpen = true;
+            windowClosesAt = null; // ← không 
+            // có countdown cho admin
         } else {
             if (trainsInRadius.length > 0) {
                 const closesAt = new Date(now.getTime() + WINDOW_GRACE_MS);
@@ -181,17 +180,10 @@ export async function GET(request: Request) {
         }
 
         const trains: TrainInfo[] = [];
-
-        for (const row of tauRes.rows) {
-            if (!trainsInRadius.includes(row.ma_tau)) continue;
-
-            const dist = isGlobalAdmin
-                ? 0
-                : Math.round(haversineDistance(gaLat, gaLng, Number(row.lat), Number(row.lng)));
-
-            // Với admin global, tìm ga gần nhất của mỗi tàu
-            let tenGaGanNhat: string | null = null;
-            if (isGlobalAdmin) {
+        const nearestGaMap: Record<string, string> = {};
+        if (isGlobalAdmin && trainsInRadius.length > 0) {
+            for (const row of tauRes.rows) {
+                if (!trainsInRadius.includes(row.ma_tau)) continue;
                 const nearestGaRes = await db.query(
                     `SELECT ten_ga,
                             ROUND(ST_Distance(
@@ -205,10 +197,38 @@ export async function GET(request: Request) {
                     [Number(row.lng), Number(row.lat)]
                 );
                 if (nearestGaRes.rows.length > 0) {
-                    tenGaGanNhat = `${nearestGaRes.rows[0].ten_ga} (~${nearestGaRes.rows[0].dist_m}m)`;
+                    nearestGaMap[row.ma_tau] = `${nearestGaRes.rows[0].ten_ga} (~${nearestGaRes.rows[0].dist_m}m)`;
                 }
             }
+        }
 
+        for (const row of tauRes.rows) {
+            if (!trainsInRadius.includes(row.ma_tau)) continue;
+
+            const dist = isGlobalAdmin
+                ? 0
+                : Math.round(haversineDistance(gaLat, gaLng, Number(row.lat), Number(row.lng)));
+            // Với admin global, tìm ga gần nhất của mỗi tàu
+            const tenGaGanNhat = isGlobalAdmin ? (nearestGaMap[row.ma_tau] ?? null) : null;
+            /*
+             if (isGlobalAdmin) {
+                 const nearestGaRes = await db.query(
+                     `SELECT ten_ga,
+                             ROUND(ST_Distance(
+                                 ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+                                 ST_Centroid(geom)::geography
+                             )) AS dist_m
+                      FROM ga
+                      WHERE geom IS NOT NULL
+                      ORDER BY dist_m ASC
+                      LIMIT 1`,
+                     [Number(row.lng), Number(row.lat)]
+                 );
+                 if (nearestGaRes.rows.length > 0) {
+                     tenGaGanNhat = `${nearestGaRes.rows[0].ten_ga} (~${nearestGaRes.rows[0].dist_m}m)`;
+                 }
+             }
+ */
             // Lấy chuyến đi đang chạy
             const tripRes = await db.query(
                 `SELECT cd.ma_chuyen_di
@@ -222,7 +242,7 @@ export async function GET(request: Request) {
             // Lấy danh sách toa - admin dùng ma_ga của ga tham chiếu để log
             let carriages: CarriageInfo[] = [];
             if (ma_chuyen_di) {
-                const logMaGa = isGlobalAdmin ? (ma_ga) : ma_ga;
+                const logMaGa = isGlobalAdmin ? ma_ga : ma_ga;
                 const toaRes = await db.query(
                     `SELECT
                         clt.ma_toa,

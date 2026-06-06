@@ -53,17 +53,19 @@ export async function POST(request: Request) {
         }
         const ma_ga: string = accountRes.rows[0].ma_ga;
 
-        //  Xác nhận cửa sổ còn mở 
-        const windowRes = await db.query(
-            `SELECT window_closes FROM station_window_state WHERE ma_ga = $1`,
-            [ma_ga]
-        );
+        //  Xác nhận cửa sổ còn mở (admin bỏ qua kiểm tra này)
         const now = new Date();
-        if (windowRes.rows.length === 0 || new Date(windowRes.rows[0].window_closes) <= now) {
-            return NextResponse.json(
-                { error: "Cửa sổ cập nhật đã đóng. Tàu không còn trong ga." },
-                { status: 403 }
+        if (role !== "admin") {
+            const windowRes = await db.query(
+                `SELECT window_closes FROM station_window_state WHERE ma_ga = $1`,
+                [ma_ga]
             );
+            if (windowRes.rows.length === 0 || new Date(windowRes.rows[0].window_closes) <= now) {
+                return NextResponse.json(
+                    { error: "Cửa sổ cập nhật đã đóng. Tàu không còn trong ga." },
+                    { status: 403 }
+                );
+            }
         }
 
         //  Đảm bảo bảng log tồn tại 

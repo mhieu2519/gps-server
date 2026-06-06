@@ -43,6 +43,7 @@ interface TrainInfo {
     ma_chuyen_di: string | null;
     distance_m: number;
     speed: number;
+    ten_ga_gan_nhat?: string | null;
     carriages: CarriageState[];
 }
 
@@ -53,6 +54,7 @@ interface ApiResponse {
     window_grace_minutes: number;
     isWindowOpen: boolean;
     windowClosesAt: string | null;
+    is_global_admin: boolean;
     trains: TrainInfo[];
     error?: string;
 }
@@ -87,28 +89,27 @@ function trangThaiColor(t: TrangThaiToa): string {
     return map[t];
 }
 
-//  Component chính
-
+//  Component chín
 export default function StationUpdatePage() {
     const [apiData, setApiData] = useState<ApiResponse | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [fetchError, setFetchError] = useState<string | null>(null);
 
-    // Trạng thái chỉnh sửa: { [ma_tau]: CarriageState[] }
     const [editMap, setEditMap] = useState<Record<string, CarriageState[]>>({});
-
-    // Tàu đang chọn để hiển thị form
     const [selectedTrain, setSelectedTrain] = useState<string | null>(null);
-
-    // Trạng thái submit
-    const [submitting, setSubmitting] = useState<string | null>(null); // ma_tau
+    const [submitting, setSubmitting] = useState<string | null>(null);
     const [submitted, setSubmitted] = useState<Record<string, boolean>>({});
 
-    // Countdown đến khi đóng cửa sổ
     const [countdown, setCountdown] = useState<number>(0);
     const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
-    //  Fetch API 
+    // Dùng ref để fetchData không bị stale closure với submitted
+    const submittedRef = useRef<Record<string, boolean>>({});
+
+    // Theo dõi trạng thái cửa sổ trước đó để detect lúc mở lại
+    const prevWindowOpenRef = useRef<boolean>(false);
+
+    //  Fetch API
     const fetchData = useCallback(async () => {
         try {
             const res = await fetch("/api/station/active-trains");
@@ -121,16 +122,22 @@ export default function StationUpdatePage() {
             setFetchError(null);
             setApiData(data);
 
-            // Khởi tạo editMap với dữ liệu mới nhất từ API (chỉ cho tàu chưa submit)
+            // Reset submitted + editMap khi cửa sổ vừa mở lại (false → true)
+            if (data.isWindowOpen && !prevWindowOpenRef.current) {
+                submittedRef.current = {};
+                setSubmitted({});
+                setEditMap({});
+            }
+            prevWindowOpenRef.current = data.isWindowOpen;
+
+            // Khởi tạo editMap cho tàu chưa submit (dùng ref để tránh stale)
             setEditMap((prev) => {
                 const next = { ...prev };
                 for (const train of data.trains) {
-                    if (!train.ma_tau || submitted[train.ma_tau]) continue;
+                    if (!train.ma_tau || submittedRef.current[train.ma_tau]) continue;
                     if (!next[train.ma_tau]) {
-                        // Chưa có → khởi tạo từ API
                         next[train.ma_tau] = train.carriages.map((c) => ({ ...c }));
                     }
-                    // Đã có → giữ nguyên để không mất dữ liệu supervisor đang nhập
                 }
                 return next;
             });
@@ -139,7 +146,7 @@ export default function StationUpdatePage() {
         } finally {
             setIsLoading(false);
         }
-    }, [submitted]);
+    }, []); // ← không depend submitted nữa, dùng ref
 
     // Polling
     useEffect(() => {
@@ -148,7 +155,7 @@ export default function StationUpdatePage() {
         return () => clearInterval(interval);
     }, [fetchData]);
 
-    // Countdown timer
+    // Countdown timer — admin global không có windowClosesAt → không hiện
     useEffect(() => {
         if (countdownRef.current) clearInterval(countdownRef.current);
         if (!apiData?.windowClosesAt) { setCountdown(0); return; }
@@ -168,7 +175,6 @@ export default function StationUpdatePage() {
             setSelectedTrain(apiData.trains[0].ma_tau);
         }
     }, [apiData, selectedTrain]);
-
     //  Handlers 
 
     const handleCarriageChange = (
@@ -214,6 +220,8 @@ export default function StationUpdatePage() {
             const data = await res.json();
             if (res.ok) {
                 toast.success(`✅ ${data.message}`);
+                // Cập nhật cả ref lẫn state cùng lúc
+                submittedRef.current = { ...submittedRef.current, [train.ma_tau]: true };
                 setSubmitted((p) => ({ ...p, [train.ma_tau]: true }));
             } else {
                 toast.error(`❌ ${data.error}`);
@@ -224,7 +232,6 @@ export default function StationUpdatePage() {
             setSubmitting(null);
         }
     };
-
     //  Render UI
 
     const isWindowOpen = apiData?.isWindowOpen ?? false;
@@ -367,7 +374,10 @@ export default function StationUpdatePage() {
                                             <p className="text-xs text-slate-400 mt-0.5">
                                                 Chuyến: <span className="font-mono text-slate-200">{train.ma_chuyen_di ?? "—"}</span>
                                                 &nbsp;·&nbsp;Tốc độ: {train.speed} km/h
-                                                &nbsp;·&nbsp;Cách ga: ~{train.distance_m}m
+                                                {apiData?.is_global_admin
+                                                    ? <>&nbsp;·&nbsp;Ga gần nhất: <span className="text-slate-200">{train.ten_ga_gan_nhat ?? "—"}</span></>
+                                                    : <>&nbsp;·&nbsp;Cách ga: ~{train.distance_m}m</>
+                                                }
                                             </p>
                                         </div>
                                         {!isSubmitted && (
