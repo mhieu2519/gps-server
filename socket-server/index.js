@@ -26,6 +26,11 @@ const redis = new Redis(process.env.REDIS_URL, {
     enableReadyCheck: false
 });
 
+// Kết nối PostgreSQL
+// Kết nối Postgres
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+});
 // Set chứa ma_tau đang có chuyến dang_chay
 let activeTrainSet = new Set();
 
