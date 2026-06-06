@@ -126,10 +126,12 @@ export default function MapDashboard() {
             // setDevices...
         });
         socket.on("train_update", (data: any) => {
-            // console.log(`🚀 Tàu ${data.ma_tau} gửi tọa độ mới: Lat=${data.lat}, Lng=${data.lng}`);
+            // console.log(` ✅  Tàu ${data.ma_tau} gửi tọa độ mới: Lat=${data.lat}, Lng=${data.lng}`);
 
             // In hẳn object map hiện tại ra xem có bị ghi đè lung tung không
             setDevices((prev) => {
+                // Chỉ update nếu tàu đã có trong devices (đã được API /status xác nhận)
+                if (!prev[data.ma_tau]) return prev;
                 const update = {
                     ...prev,
                     [data.ma_tau]: {

@@ -4,6 +4,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const Redis = require('ioredis');
+const { Pool } = require('pg');
 
 const app = express();
 const server = http.createServer(app);
@@ -25,6 +26,29 @@ const redis = new Redis(process.env.REDIS_URL, {
     enableReadyCheck: false
 });
 
+// Set chứa ma_tau đang có chuyến dang_chay
+let activeTrainSet = new Set();
+
+async function refreshActiveTrains() {
+    try {
+        const res = await pool.query(`
+            SELECT ma_tau_chay
+            FROM chuyen_di
+            WHERE trang_thai = 'dang_chay'
+              AND ma_tau_chay IS NOT NULL
+        `);
+        activeTrainSet = new Set(res.rows.map(r => r.ma_tau_chay));
+        console.log(`🔄 Whitelist tàu hợp lệ: [${[...activeTrainSet].join(', ')}]`);
+    } catch (err) {
+        console.error("❌ Lỗi refresh whitelist tàu:", err.message);
+    }
+}
+
+// Chạy ngay khi khởi động, sau đó refresh mỗi 30 giây
+refreshActiveTrains();
+setInterval(refreshActiveTrains, 30_000);
+
+
 const SUB_CHANNEL = 'train_locations';
 
 // Đăng ký kênh nhận tọa độ
@@ -38,13 +62,20 @@ redis.subscribe(SUB_CHANNEL, (err, count) => {
 
 // Khi có dữ liệu mới từ Redis, gửi tới Client
 redis.on('message', (channel, message) => {
-    if (channel === SUB_CHANNEL) {
-        try {
-            const data = JSON.parse(message);
-            io.emit('train_update', data);
-        } catch (e) {
-            console.error("❌ Lỗi parse JSON từ Redis:", e.message);
+    if (channel !== SUB_CHANNEL) return;
+
+    try {
+        const data = JSON.parse(message);
+
+        // ✅ Chỉ emit nếu tàu đang có chuyến dang_chay
+        if (!activeTrainSet.has(data.ma_tau)) {
+            console.log(`⛔ Bỏ qua tàu chưa lập: ${data.ma_tau}`);
+            return;
         }
+
+        io.emit('train_update', data);
+    } catch (e) {
+        console.error("❌ Lỗi parse JSON từ Redis:", e.message);
     }
 });
 
@@ -67,67 +98,20 @@ app.get('/', (req, res) => {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>GPS Tracking</title>
-            <meta name="description" content="Real-time GPS tracking application">
-            <link rel="icon" type="image/x-icon" href="/favicon.ico">
             <style>
-                body {
-                    margin: 0;
-                    padding: 0;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    background: #1e1e2f;
-                    color: #ffffff;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    text-align: center;
-                }
-                .card {
-                    background: #27293d;
-                    padding: 40px;
-                    border-radius: 15px;
-                    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-                    max-width: 450px;
-                    width: 90%;
-                }
-                .icon {
-                    font-size: 50px;
-                    margin-bottom: 20px;
-                }
-                h1 {
-                    font-size: 24px;
-                    margin-bottom: 10px;
-                    color: #e14eca;
-                }
-
-                p {
-                    color: #9a9a9a;
-                    font-size: 15px;
-                    line-height: 1.6;
-                    margin-bottom: 30px;
-                }
-                .btn {
-                    display: inline-block;
-                    background: linear-gradient(to right, #e14eca, #ba54f5);
-                    color: #ffffff;
-                    text-decoration: none;
-                    padding: 12px 30px;
-                    border-radius: 25px;
-                    font-weight: bold;
-                    transition: transform 0.2s, box-shadow 0.2s;
-                    box-shadow: 0 4px 15px rgba(225, 78, 202, 0.4);
-                }
-                .btn:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(225, 78, 202, 0.6);
-                }
+                body { margin:0; padding:0; font-family:'Segoe UI',sans-serif; background:#1e1e2f; color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; }
+                .card { background:#27293d; padding:40px; border-radius:15px; box-shadow:0 8px 24px rgba(0,0,0,.3); max-width:450px; width:90%; }
+                .icon { font-size:50px; margin-bottom:20px; }
+                h1 { font-size:24px; margin-bottom:10px; color:#e14eca; }
+                p { color:#9a9a9a; font-size:15px; line-height:1.6; margin-bottom:30px; }
+                .btn { display:inline-block; background:linear-gradient(to right,#e14eca,#ba54f5); color:#fff; text-decoration:none; padding:12px 30px; border-radius:25px; font-weight:bold; }
             </style>
         </head>
         <body>
             <div class="card">
                 <div class="icon">📡</div>
                 <h1>Cổng Dịch Vụ Realtime</h1>
-                <p>Bạn đang truy cập vào cổng dịch vụ Socket API chạy ngầm của hệ thống bản đồ đường sắt. Vui lòng quay lại trang chủ để xem bản đồ trực tuyến.</p>
+                <p>Bạn đang truy cập vào cổng dịch vụ Socket API chạy ngầm của hệ thống bản đồ đường sắt.</p>
                 <a href="https://${process.env.DOMAIN}" class="btn">Quay về Trang Chủ Bản Đồ</a>
             </div>
         </body>
@@ -137,5 +121,5 @@ app.get('/', (req, res) => {
 
 const PORT = 4000;
 server.listen(PORT, () => {
-    console.log(`🚀 Socket.io Server đang chạy tại port ${PORT}...`);
+    console.log(` Socket.io Server đang chạy tại port ${PORT}...`);
 });

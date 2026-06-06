@@ -6,11 +6,7 @@ import { NextResponse } from 'next/server';
 import { db } from "@/lib/db";
 
 export async function GET() {
-
-
     try {
-
-
         // Lấy dữ liệu và chuyển geom thành tọa độ X, Y
         const res = await db.query(`
     SELECT 
@@ -66,6 +62,10 @@ export async function GET() {
         ) AS danh_sach_ga_chi_tiet
 
     FROM tau t
+    -- ✅ Chỉ lấy tàu đang có chuyến dang_chay
+    INNER JOIN chuyen_di cd_check
+        ON cd_check.ma_tau_chay = t.ma_tau
+        AND cd_check.trang_thai = 'dang_chay'
     WHERE t.lat IS NOT NULL AND t.lng IS NOT NULL
 `);
 
