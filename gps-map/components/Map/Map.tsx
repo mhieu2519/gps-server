@@ -114,19 +114,19 @@ export default function MapDashboard() {
             withCredentials: true
         });
         socket.on("connect", () => {
-            // console.log("🟢 Socket.io đã kết nối thành công! ID:", socket.id);
+            console.log("🟢 Socket.io đã kết nối thành công! ID:", socket.id);
         });
 
         socket.on("connect_error", (err) => {
-            // console.error("🔴 Lỗi kết nối Socket.io:", err.message);
+            console.error("🔴 Lỗi kết nối Socket.io:", err.message);
         });
 
-        // socket.on("train_update", (data: any) => {
-        // console.log("📥 Nhận dữ liệu realtime từ tàu:", data);
-        // setDevices...
-        //  });
         socket.on("train_update", (data: any) => {
-            // console.log(` ✅  Tàu ${data.ma_tau} gửi tọa độ mới: Lat=${data.lat}, Lng=${data.lng}`);
+            console.log("📥 Nhận dữ liệu realtime từ tàu:", data);
+            // setDevices...
+        });
+        socket.on("train_update", (data: any) => {
+            console.log(` ✅  Tàu ${data.ma_tau} gửi tọa độ mới: Lat=${data.lat}, Lng=${data.lng}`);
 
             // In hẳn object map hiện tại ra xem có bị ghi đè lung tung không
             setDevices((prev) => {
@@ -155,7 +155,7 @@ export default function MapDashboard() {
                         } : existing.socketData
                     }
                 };
-                // console.log("📊 State [devices] sau khi up từ Socket:", update);
+                console.log("📊 State [devices] sau khi up từ Socket:", update);
                 return update;
             });
         });
