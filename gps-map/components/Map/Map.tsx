@@ -121,10 +121,10 @@ export default function MapDashboard() {
             // console.error("🔴 Lỗi kết nối Socket.io:", err.message);
         });
 
-        socket.on("train_update", (data: any) => {
-            // console.log("📥 Nhận dữ liệu realtime từ tàu:", data);
-            // setDevices...
-        });
+        // socket.on("train_update", (data: any) => {
+        // console.log("📥 Nhận dữ liệu realtime từ tàu:", data);
+        // setDevices...
+        //  });
         socket.on("train_update", (data: any) => {
             // console.log(` ✅  Tàu ${data.ma_tau} gửi tọa độ mới: Lat=${data.lat}, Lng=${data.lng}`);
 
@@ -133,13 +133,15 @@ export default function MapDashboard() {
                 // Chỉ update nếu tàu đã có trong devices (đã được API /status xác nhận)
                 if (!prev[data.ma_tau]) return prev;
                 const sd = data.socketData;
-
+                const lat = Number(data.latitude ?? data.lat);
+                const lng = Number(data.longitude ?? data.lng);
+                const existing = prev[data.ma_tau] || {};
                 const update = {
                     ...prev,
                     [data.ma_tau]: {
-                        ...prev[data.ma_tau],
-                        lat: Number(data.lat),
-                        lng: Number(data.lng),
+                        ...existing,
+                        lat,
+                        lng,
                         speed: Number(data.speed || 0),
                         heading: Number(data.heading || 0),
                         // Lấy thông tin tính toán tiến độ bám ray từ socket
@@ -150,7 +152,7 @@ export default function MapDashboard() {
                             distance_left_meters: Number(sd.distance_left_meters || 0),
                             eta_minutes: Number(sd.eta_minutes || 0),
                             is_at_station: Boolean(sd.is_at_station),
-                        } : prev[data.ma_tau].socketData
+                        } : existing.socketData
                     }
                 };
                 // console.log("📊 State [devices] sau khi up từ Socket:", update);

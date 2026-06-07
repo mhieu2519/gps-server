@@ -86,7 +86,7 @@ redis.on('message', async (channel, message) => {
 
         if (isNaN(lat) || isNaN(lng)) return;
 
-        // 2. Chạy giải thuật PostGIS chiếu điểm lên MULTILINESTRING của bảng duong_ray
+        //  Chạy giải thuật PostGIS chiếu điểm lên MULTILINESTRING của bảng duong_ray
         const geoQuery = `
             WITH closest_track AS (
                 -- Tìm phân đoạn đường ray hình học gần tàu nhất
@@ -123,10 +123,10 @@ redis.on('message', async (channel, message) => {
             const totalLenMeters = parseFloat(row.total_len_meters);
             const progressFraction = parseFloat(row.real_progress_fraction);
 
-            // 3. Tính toán khoảng cách thực tế còn lại dọc theo đường cong ray (mét)
+            // Tính toán khoảng cách thực tế còn lại dọc theo đường cong ray (mét)
             const distanceLeftMeters = totalLenMeters * (1.0 - progressFraction);
 
-            // 4. Tính toán ETA (Phút) dựa trên khoảng cách hình học và vận tốc thực tế
+            //  Tính toán ETA (Phút) dựa trên khoảng cách hình học và vận tốc thực tế
             let etaMinutes = -1; // -1 biểu thị trạng thái không xác định (ví dụ tàu dừng)
             if (speed > 5) {
                 const distanceLeftKm = distanceLeftMeters / 1000;
@@ -142,7 +142,7 @@ redis.on('message', async (channel, message) => {
                 nextStationCode = codes[0] || "";
             }
 
-            // 5. Tổng hợp dữ liệu nâng cao bám ray
+            //  Tổng hợp dữ liệu nâng cao bám ray
             const enrichedData = {
                 ...data,
                 latitude: lat,
