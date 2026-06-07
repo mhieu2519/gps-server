@@ -114,7 +114,7 @@ redis.on('message', async (channel, message) => {
                     single_line,
                     DEGREES(ST_Azimuth(ST_StartPoint(single_line), ST_EndPoint(single_line))) as track_angle
                 FROM project_train
-            )
+            ),
            
             direction AS (
                 SELECT 

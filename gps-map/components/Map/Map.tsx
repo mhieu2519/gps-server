@@ -121,11 +121,9 @@ export default function MapDashboard() {
             console.error("🔴 Lỗi kết nối Socket.io:", err.message);
         });
 
+
         socket.on("train_update", (data: any) => {
             console.log("📥 Nhận dữ liệu realtime từ tàu:", data);
-            // setDevices...
-        });
-        socket.on("train_update", (data: any) => {
             console.log(` ✅  Tàu ${data.ma_tau} gửi tọa độ mới: Lat=${data.lat}, Lng=${data.lng}`);
 
             // In hẳn object map hiện tại ra xem có bị ghi đè lung tung không

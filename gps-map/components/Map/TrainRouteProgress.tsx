@@ -35,23 +35,35 @@ export default function TrainRouteProgress({ routeStations, socketData }: TrainP
     const totalStations = routeStations.length;
     const { next_station_code, segment_progress, eta_minutes, is_at_station, distance_left_meters } = socketData;
 
-    // 1. Xác định vị trí Index của ga tiếp theo trong mảng hành trình
-    let nextStationIdx = routeStations.findIndex(st => st.ma_ga === next_station_code);
+    // 1. Xác định vị trí Index của ga tiếp theo trong mảng hành trình cụ thể của chuyến đi
+    let nextStationIdx = routeStations.findIndex(st => st.ma_ga.trim() === next_station_code.trim());
+
+    // Nếu không tìm thấy, thử tìm theo cặp mã trong current_segment (Ví dụ: "HN-LB")
+    if (nextStationIdx === -1) {
+        nextStationIdx = routeStations.findIndex(st => next_station_code.includes(st.ma_ga.trim()));
+    }
     if (nextStationIdx === -1) nextStationIdx = 0;
 
-    // Xác định phân đoạn hiện tại nằm giữa index nào và index nào trong lộ trình
-    const currentSegmentIdx = Math.max(0, nextStationIdx - 1);
+    // Xác định ga vừa đi qua (ga trước của phân đoạn hiện tại trên UI)
+    // Nếu nextStationIdx là ga đầu tiên (0), ga trước đó cũng là 0. Ngược lại là nextStationIdx - 1.
+    const lastStationIdx = nextStationIdx > 0 ? nextStationIdx - 1 : 0;
 
-    // 2. Tính toán chính xác phần trăm tiến độ tổng thể của toàn bộ tuyến đường (Thanh Progress tổng)
+    // 2. Tính toán phần trăm tiến độ tổng thể trên toàn tuyến
     let progressPercent = 0;
     if (is_at_station) {
         progressPercent = totalStations > 1 ? (nextStationIdx / (totalStations - 1)) * 100 : 100;
     } else {
-        const basePercent = (currentSegmentIdx / (totalStations - 1)) * 100;
+        // Tỷ lệ phần trăm nền tính từ ga xuất phát đến ga vừa đi qua
+        const basePercent = (lastStationIdx / (totalStations - 1)) * 100;
+        // Trọng số của riêng phân đoạn hiện tại trên tổng thể hành trình
         const segmentWeight = (1 / (totalStations - 1)) * 100;
+
+        // Tiến độ mượt bám theo đoạn ray hiện tại
         progressPercent = basePercent + (segment_progress * segmentWeight);
     }
 
+    // Giới hạn giá trị trong khoảng từ 0% đến 100% để tránh tràn giao diện
+    progressPercent = Math.min(100, Math.max(0, progressPercent));
     // Tự động cuộn ngang màn hình mượt mà theo ga hiện tại
     useEffect(() => {
         if (currentStationRef.current) {
@@ -85,8 +97,8 @@ export default function TrainRouteProgress({ routeStations, socketData }: TrainP
                         </span>
                     )}
                     <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${is_at_station
-                            ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : "bg-blue-50 text-blue-700 border-blue-200"
+                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                        : "bg-blue-50 text-blue-700 border-blue-200"
                         }`}>
                         {is_at_station
                             ? `Đang đỗ tại: ${routeStations[nextStationIdx]?.ten_ga || next_station_code}`
@@ -128,7 +140,7 @@ export default function TrainRouteProgress({ routeStations, socketData }: TrainP
                             isPassed = idx < nextStationIdx;
                             isCurrent = idx === nextStationIdx;
                         } else {
-                            isPassed = idx <= currentSegmentIdx;
+                            isPassed = idx <= lastStationIdx;
                             isCurrent = idx === nextStationIdx;
                         }
 
@@ -140,12 +152,12 @@ export default function TrainRouteProgress({ routeStations, socketData }: TrainP
                                 style={{ width: `${stationWidth}px` }}
                             >
                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[8px] font-bold transition-all duration-500 bg-white ${isCurrent && is_at_station
-                                        ? "border-amber-500 text-amber-600 scale-110 shadow-md ring-4 ring-amber-100"
-                                        : isCurrent && !is_at_station
-                                            ? "border-blue-500 text-blue-600 scale-110 shadow-md ring-4 ring-blue-100"
-                                            : isPassed
-                                                ? "border-blue-500 bg-blue-50 text-blue-600"
-                                                : "border-gray-200 text-gray-400"
+                                    ? "border-amber-500 text-amber-600 scale-110 shadow-md ring-4 ring-amber-100"
+                                    : isCurrent && !is_at_station
+                                        ? "border-blue-500 text-blue-600 scale-110 shadow-md ring-4 ring-blue-100"
+                                        : isPassed
+                                            ? "border-blue-500 bg-blue-50 text-blue-600"
+                                            : "border-gray-200 text-gray-400"
                                     }`}>
                                     {isCurrent ? (
                                         <FcRating className="text-base animate-pulse" />
@@ -156,12 +168,12 @@ export default function TrainRouteProgress({ routeStations, socketData }: TrainP
 
                                 <div className="absolute top-10 flex flex-col items-center text-center w-[120px]">
                                     <span className={`text-[11px] font-semibold tracking-tight line-clamp-2 text-center leading-tight transition-colors duration-300 ${isCurrent && is_at_station
-                                            ? "text-amber-600 font-bold"
-                                            : isCurrent && !is_at_station
-                                                ? "text-blue-600 font-bold"
-                                                : isPassed
-                                                    ? "text-gray-700"
-                                                    : "text-gray-400"
+                                        ? "text-amber-600 font-bold"
+                                        : isCurrent && !is_at_station
+                                            ? "text-blue-600 font-bold"
+                                            : isPassed
+                                                ? "text-gray-700"
+                                                : "text-gray-400"
                                         }`}>
                                         {station.ten_ga}
                                     </span>
