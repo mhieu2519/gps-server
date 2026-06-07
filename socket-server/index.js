@@ -87,33 +87,47 @@ redis.on('message', async (channel, message) => {
         if (isNaN(lat) || isNaN(lng)) return;
 
         //  Chạy giải thuật PostGIS chiếu điểm lên MULTILINESTRING của bảng duong_ray
+
         const geoQuery = `
-            WITH closest_track AS (
-                -- Tìm phân đoạn đường ray hình học gần tàu nhất
+            WITH project_train AS (
+                -- Bước 1: Tìm phân đoạn đường ray gần tàu nhất bằng khoảng cách thực (geography)
+                -- Đồng thời trích xuất LineString đầu tiên từ MultiLineString để tính toán Start/End Point
                 SELECT 
                     id,
                     ten_tuyen,
                     geom,
+                    ST_GeometryN(geom, 1) as single_line,
                     ST_Length(geom::geography) as total_len_meters,
-                    ST_LineLocatePoint(geom, ST_SetSRID(ST_MakePoint($1, $2), 4326)) as fraction
+                    ST_LineLocatePoint(ST_GeometryN(geom, 1), ST_SetSRID(ST_MakePoint($1, $2), 4326)) as fraction
                 FROM duong_ray
-                ORDER BY geom <-> ST_SetSRID(ST_MakePoint($1, $2), 4326)
+                ORDER BY geom::geography <-> ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
                 LIMIT 1
+            ),
+            azimuth_calc AS (
+                -- Bước 2: Tính toán góc hướng (Azimuth) của đường ray dựa trên điểm đầu và điểm cuối
+                -- Chuyển đổi radian của ST_Azimuth sang độ (0-360) để so sánh trực tiếp với heading của thiết bị
+                SELECT 
+                    id as segment_id,
+                    ten_tuyen,
+                    total_len_meters,
+                    fraction,
+                    single_line,
+                    DEGREES(ST_Azimuth(ST_StartPoint(single_line), ST_EndPoint(single_line))) as track_angle
+                FROM project_train
             )
+            -- Bước 3: So sánh góc mũi tàu (heading) với góc đường ray để biết tàu chạy xuôi hay ngược chuỗi ID
             SELECT 
-                id as segment_id,
+                segment_id,
                 ten_tuyen,
                 total_len_meters,
                 fraction,
-                -- Kiểm tra góc hướng mũi tàu so với hướng Vector lưu của chuỗi đường ray (Azimuth)
-                -- Nếu lệch dưới 90 độ (PI/2) -> Tàu chạy xuôi theo chuỗi ID
-                -- Nếu lệch trên 90 độ -> Tàu chạy ngược chiều
                 CASE 
-                    WHEN ABS(ST_Azimuth(ST_StartPoint(geom), ST_EndPoint(geom)) - ($3 * PI() / 180)) < PI()/2
+                    -- Nếu góc lệch giữa heading ($3) và hướng vector đường ray nhỏ hơn 90 độ hoặc lớn hơn 270 độ -> Tàu chạy xuôi
+                    WHEN ABS(track_angle - $3) < 90 OR ABS(track_angle - $3) > 270
                     THEN fraction
                     ELSE (1.0 - fraction)
                 END as real_progress_fraction
-            FROM closest_track;
+            FROM azimuth_calc;
         `;
 
         const geoResult = await pool.query(geoQuery, [lng, lat, heading]);
