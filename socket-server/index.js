@@ -145,9 +145,11 @@ redis.on('message', async (channel, message) => {
             //  Tổng hợp dữ liệu nâng cao bám ray
             const enrichedData = {
                 ...data,
+                lat: lat,
+                lng: lng,
                 latitude: lat,
                 longitude: lng,
-                velocity: speed,
+                speed: speed,
                 heading: heading,
                 // Thuộc tính hình học PostGIS cấu trúc đồng bộ cho Front-end mới
                 socketData: {
