@@ -1,4 +1,5 @@
-// index.js - Socket.io Server để phát dữ liệu thời gian thực từ Redis đến trình duyệt
+// gps-server/socket-server/index.js - 
+// Socket.io Server để phát dữ liệu thời gian thực từ Redis đến trình duyệt
 
 const express = require("express");
 const http = require("http");
@@ -26,8 +27,7 @@ const redis = new Redis(process.env.REDIS_URL, {
     enableReadyCheck: false
 });
 
-// Kết nối PostgreSQL
-// Kết nối Postgres
+// Kết nối PostgreS
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
 });
@@ -66,7 +66,7 @@ redis.subscribe(SUB_CHANNEL, (err, count) => {
 });
 
 // Khi có dữ liệu mới từ Redis, gửi tới Client
-redis.on('message', (channel, message) => {
+redis.on('message', async (channel, message) => {
     if (channel !== SUB_CHANNEL) return;
 
     try {
@@ -78,7 +78,95 @@ redis.on('message', (channel, message) => {
             return;
         }
 
-        io.emit('train_update', data);
+        // Bóc tách thông số GPS đầu vào (Hỗ trợ dự phòng nếu thiết bị không gửi heading)
+        const lat = parseFloat(data.latitude || data.lat);
+        const lng = parseFloat(data.longitude || data.lng);
+        const speed = parseFloat(data.velocity || data.speed || 0); // km/h
+        const heading = parseFloat(data.heading || 0); // Hướng góc mũi tàu từ 0 đến 360 độ
+
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        // 2. Chạy giải thuật PostGIS chiếu điểm lên MULTILINESTRING của bảng duong_ray
+        const geoQuery = `
+            WITH closest_track AS (
+                -- Tìm phân đoạn đường ray hình học gần tàu nhất
+                SELECT 
+                    id,
+                    ten_tuyen,
+                    geom,
+                    ST_Length(geom::geography) as total_len_meters,
+                    ST_LineLocatePoint(geom, ST_SetSRID(ST_MakePoint($1, $2), 4326)) as fraction
+                FROM duong_ray
+                ORDER BY geom <-> ST_SetSRID(ST_MakePoint($1, $2), 4326)
+                LIMIT 1
+            )
+            SELECT 
+                id as segment_id,
+                ten_tuyen,
+                total_len_meters,
+                fraction,
+                -- Kiểm tra góc hướng mũi tàu so với hướng Vector lưu của chuỗi đường ray (Azimuth)
+                -- Nếu lệch dưới 90 độ (PI/2) -> Tàu chạy xuôi theo chuỗi ID
+                -- Nếu lệch trên 90 độ -> Tàu chạy ngược chiều
+                CASE 
+                    WHEN ABS(ST_Azimuth(ST_StartPoint(geom), ST_EndPoint(geom)) - ($3 * PI() / 180)) < PI()/2
+                    THEN fraction
+                    ELSE (1.0 - fraction)
+                END as real_progress_fraction
+            FROM closest_track;
+        `;
+
+        const geoResult = await pool.query(geoQuery, [lng, lat, heading]);
+
+        if (geoResult.rows.length > 0) {
+            const row = geoResult.rows[0];
+            const totalLenMeters = parseFloat(row.total_len_meters);
+            const progressFraction = parseFloat(row.real_progress_fraction);
+
+            // 3. Tính toán khoảng cách thực tế còn lại dọc theo đường cong ray (mét)
+            const distanceLeftMeters = totalLenMeters * (1.0 - progressFraction);
+
+            // 4. Tính toán ETA (Phút) dựa trên khoảng cách hình học và vận tốc thực tế
+            let etaMinutes = -1; // -1 biểu thị trạng thái không xác định (ví dụ tàu dừng)
+            if (speed > 5) {
+                const distanceLeftKm = distanceLeftMeters / 1000;
+                etaMinutes = (distanceLeftKm / speed) * 60; // Giờ sang Phút
+            }
+
+            // Tách tên Ga tiếp theo dựa trên ID phân đoạn và chiều di chuyển thực tế
+            // Ví dụ phân đoạn ID "HD-TT". Đi xuôi -> Ga sắp đến là TT. Đi ngược -> Ga sắp đến là HD.
+            const codes = row.segment_id.split('-');
+            let nextStationCode = codes[1] || "";
+            if (parseFloat(row.fraction) !== progressFraction) {
+                // Nếu fraction khác progressFraction chứng tỏ tàu chạy ngược, đổi ga đích thành mã ga đầu
+                nextStationCode = codes[0] || "";
+            }
+
+            // 5. Tổng hợp dữ liệu nâng cao bám ray
+            const enrichedData = {
+                ...data,
+                latitude: lat,
+                longitude: lng,
+                velocity: speed,
+                heading: heading,
+                // Thuộc tính hình học PostGIS cấu trúc đồng bộ cho Front-end mới
+                socketData: {
+                    current_segment: row.segment_id,
+                    next_station_code: nextStationCode,
+                    segment_progress: progressFraction, // Giá trị mượt từ 0.0 -> 1.0 thực tế của riêng đoạn đó
+                    distance_left_meters: Math.max(0, distanceLeftMeters),
+                    eta_minutes: etaMinutes,
+                    is_at_station: speed < 3 && distanceLeftMeters < 150 // Logic bổ trợ nhận diện tàu đỗ ga xép
+                }
+            };
+
+            // Bắn gói tin đã được xử lý hình học mượt mà về Front-end map
+            io.emit('train_update', enrichedData);
+
+        } else {
+
+            io.emit('train_update', data);
+        }
     } catch (e) {
         console.error("❌ Lỗi parse JSON từ Redis:", e.message);
     }

@@ -1,17 +1,11 @@
 // gps-server/gps-map/components/Map/TrainRouteProgress.tsx
+// phương án 1: tiến độ bằng đường chim bay giải thytaat Haversine, không phụ thuộc vào tốc độ hiện tại (vì có thể tàu đang tạm dừng giữa đường). 
+// Tính toán này sẽ cho phép xác định chính xác hơn vị trí tàu trên lộ trình, đặc biệt khi tàu đang di chuyển giữa các ga hoặc đang tạm dừng tại ga mà không có tín hiệu tốc độ rõ ràng.
+// nhược d
+// chuyển qua phương án 2: 
+
 import { useEffect, useRef } from "react";
 import { FcMindMap, FcRating } from "react-icons/fc";
-
-function getHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371000;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-}
 
 interface StationDetails {
     ma_ga: string;
@@ -20,70 +14,45 @@ interface StationDetails {
     lng: number;
 }
 
-export default function TrainRouteProgress({
-    currentLat,
-    currentLng,
-    routeStations
-}: {
-    currentLat: number;
-    currentLng: number;
-    routeStations: StationDetails[]
-}) {
+interface TrainProgressProps {
+    routeStations: StationDetails[];
+    // Nhận trực tiếp cụm object socketData bám ray từ Backend bắn về
+    socketData: {
+        current_segment: string;
+        next_station_code: string;
+        segment_progress: number;    // Tiến độ mượt 0.0 -> 1.0 thực tế của riêng đoạn đó
+        distance_left_meters: number;
+        eta_minutes: number;
+        is_at_station: boolean;
+    }
+}
+
+export default function TrainRouteProgress({ routeStations, socketData }: TrainProgressProps) {
     const currentStationRef = useRef<HTMLDivElement | null>(null);
-    if (!routeStations || routeStations.length === 0) return null;
+
+    if (!routeStations || routeStations.length === 0 || !socketData) return null;
 
     const totalStations = routeStations.length;
+    const { next_station_code, segment_progress, eta_minutes, is_at_station, distance_left_meters } = socketData;
 
-    // Tính toán tiến độ
-    let absoluteClosestIdx = 0;
-    let minDistanceToAnyStation = Infinity;
+    // 1. Xác định vị trí Index của ga tiếp theo trong mảng hành trình
+    let nextStationIdx = routeStations.findIndex(st => st.ma_ga === next_station_code);
+    if (nextStationIdx === -1) nextStationIdx = 0;
 
-    routeStations.forEach((station, index) => {
-        const dist = getHaversineDistance(currentLat, currentLng, station.lat, station.lng);
-        if (dist < minDistanceToAnyStation) {
-            minDistanceToAnyStation = dist;
-            absoluteClosestIdx = index;
-        }
-    });
-    // Nếu có biến currentSpeed truyền vào từ props:
-    // const isAtStation = minDistanceToAnyStation < 200 && currentSpeed < 5;
-    const isAtStation = minDistanceToAnyStation < 200; // Ngưỡng 200m để xác định "đang đỗ tại ga"
+    // Xác định phân đoạn hiện tại nằm giữa index nào và index nào trong lộ trình
+    const currentSegmentIdx = Math.max(0, nextStationIdx - 1);
+
+    // 2. Tính toán chính xác phần trăm tiến độ tổng thể của toàn bộ tuyến đường (Thanh Progress tổng)
     let progressPercent = 0;
-    let nextStationIndex = 0;
-
-    if (isAtStation) {
-        progressPercent = totalStations > 1 ? (absoluteClosestIdx / (totalStations - 1)) * 100 : 100;
-        nextStationIndex = absoluteClosestIdx;
+    if (is_at_station) {
+        progressPercent = totalStations > 1 ? (nextStationIdx / (totalStations - 1)) * 100 : 100;
     } else {
-        let segmentIdx = 0;
-        let minSegmentScore = Infinity;
-
-        for (let i = 0; i < totalStations - 1; i++) {
-            const stA = routeStations[i];
-            const stB = routeStations[i + 1];
-            const distToA = getHaversineDistance(currentLat, currentLng, stA.lat, stA.lng);
-            const distToB = getHaversineDistance(currentLat, currentLng, stB.lat, stB.lng);
-            const totalSegmentDist = getHaversineDistance(stA.lat, stA.lng, stB.lat, stB.lng);
-            const score = (distToA + distToB) - totalSegmentDist;
-
-            if (score < minSegmentScore) {
-                minSegmentScore = score;
-                segmentIdx = i;
-            }
-        }
-
-        const stationA = routeStations[segmentIdx];
-        const stationB = routeStations[segmentIdx + 1];
-        const distFromA = getHaversineDistance(currentLat, currentLng, stationA.lat, stationA.lng);
-        const distToB = getHaversineDistance(currentLat, currentLng, stationB.lat, stationB.lng);
-        const segmentProgress = distFromA / (distFromA + distToB);
-
-        const basePercent = (segmentIdx / (totalStations - 1)) * 100;
+        const basePercent = (currentSegmentIdx / (totalStations - 1)) * 100;
         const segmentWeight = (1 / (totalStations - 1)) * 100;
-        progressPercent = basePercent + (segmentProgress * segmentWeight);
-        nextStationIndex = segmentIdx + 1;
+        progressPercent = basePercent + (segment_progress * segmentWeight);
     }
 
+    // Tự động cuộn ngang màn hình mượt mà theo ga hiện tại
     useEffect(() => {
         if (currentStationRef.current) {
             currentStationRef.current.scrollIntoView({
@@ -92,55 +61,55 @@ export default function TrainRouteProgress({
                 inline: "center"
             });
         }
-    }, [nextStationIndex, isAtStation]);
+    }, [nextStationIdx, is_at_station]);
 
-    // Định dạng độ rộng cố định cho mỗi phân đoạn ga để chống dồn chữ khi cuộn ngang
+    // Cấu hình đồ họa UI thanh Timeline
     const stationWidth = 68;
     const centerOffset = stationWidth / 2;
-
     const timelineWidth = totalStations * stationWidth;
-    const trackWidth = timelineWidth - stationWidth; // Đường ray chỉ chạy giữa các ga, không kéo dài ra ngoài ga đầu tiên và cuối cùng
-
+    const trackWidth = timelineWidth - stationWidth;
     const progressWidth = (trackWidth * progressPercent) / 100;
 
     return (
         <div className="w-full bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm my-3 select-none">
-            {/* Header trạng thái */}
+            {/* Header hiển thị Real-time thông số đếm ngược thời gian */}
             <div className="flex justify-between items-center mb-4">
                 <span className="flex items-center text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                     <FcMindMap className="mr-1.5 text-lg" /> Tiến độ lộ trình
                 </span>
-                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${isAtStation
-                    ? "bg-amber-50 text-amber-700 border-amber-200"
-                    : "bg-blue-50 text-blue-700 border-blue-200"
-                    }`}>
-                    {isAtStation
-                        ? `Đang đỗ: ${routeStations[absoluteClosestIdx].ten_ga}`
-                        : `Sắp tiến vào: ${routeStations[nextStationIndex].ten_ga}`}
-                </span>
+
+                <div className="flex gap-2">
+                    {!is_at_station && eta_minutes > 0 && (
+                        <span className="text-[11px] font-medium bg-gray-50 text-gray-600 border border-gray-200 px-2.5 py-1 rounded-full">
+                            Còn {(distance_left_meters / 1000).toFixed(1)} km - Dự kiến: {Math.ceil(eta_minutes)} phút
+                        </span>
+                    )}
+                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${is_at_station
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-blue-50 text-blue-700 border-blue-200"
+                        }`}>
+                        {is_at_station
+                            ? `Đang đỗ tại: ${routeStations[nextStationIdx]?.ten_ga || next_station_code}`
+                            : `Sắp tiến vào: ${routeStations[nextStationIdx]?.ten_ga || next_station_code}`}
+                    </span>
+                </div>
             </div>
 
-            {/* Khung cuộn ngang mượt mà, cấp thêm padding-bottom để không bị cắt chữ tên ga */}
+            {/* Khung cuộn ngang đồ họa tiến độ chạy tàu */}
             <div className="w-full overflow-x-auto pb-8 pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <div
-                    className="relative flex items-center"
-                    style={{
-                        width: `${timelineWidth}px`,
-                        margin: "0 auto"
-                    }}
-                >
+                <div className="relative flex items-center" style={{ width: `${timelineWidth}px`, margin: "0 auto" }}>
+
                     {/* Đường ray xám nền */}
                     <div
                         className="absolute h-1 bg-gray-100 rounded z-0"
                         style={{
                             left: `${centerOffset}px`,
-                            // right: `${centerOffset}px`,
                             width: `${trackWidth}px`,
                             top: '12px'
                         }}
                     ></div>
 
-                    {/* Thanh tiến độ màu xanh chạy động */}
+                    {/* Thanh tiến độ màu xanh bám sát theo PostGIS */}
                     <div
                         className="absolute h-1 bg-blue-500 rounded z-10 transition-all duration-700 ease-out"
                         style={{
@@ -150,17 +119,17 @@ export default function TrainRouteProgress({
                         }}
                     ></div>
 
-                    {/* Vòng lặp danh sách các Ga */}
+                    {/* Danh sách các Ga dọc hành trình */}
                     {routeStations.map((station, idx) => {
                         let isPassed = false;
                         let isCurrent = false;
 
-                        if (isAtStation) {
-                            isPassed = idx < absoluteClosestIdx;
-                            isCurrent = idx === absoluteClosestIdx;
+                        if (is_at_station) {
+                            isPassed = idx < nextStationIdx;
+                            isCurrent = idx === nextStationIdx;
                         } else {
-                            isPassed = idx < nextStationIndex;
-                            isCurrent = idx === nextStationIndex;
+                            isPassed = idx <= currentSegmentIdx;
+                            isCurrent = idx === nextStationIdx;
                         }
 
                         return (
@@ -168,36 +137,31 @@ export default function TrainRouteProgress({
                                 key={station.ma_ga}
                                 ref={isCurrent ? currentStationRef : null}
                                 className="flex flex-col items-center relative z-20 transition-all duration-300"
-                                style={{
-                                    width: `${stationWidth}px`,
-                                    marginRight: idx === totalStations - 1 ? 0 : '0px'
-                                }}
+                                style={{ width: `${stationWidth}px` }}
                             >
-                                {/* Nút tròn Ga */}
-                                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[8px] font-bold transition-all duration-500 bg-white ${isCurrent && isAtStation
-                                    ? "border-amber-500 text-amber-600 scale-110 shadow-md ring-4 ring-amber-100"
-                                    : isCurrent && !isAtStation
-                                        ? "border-blue-500 text-blue-600 scale-110 shadow-md ring-4 ring-blue-100"
-                                        : isPassed
-                                            ? "border-blue-500 bg-blue-50 text-blue-600"
-                                            : "border-gray-200 text-gray-400"
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[8px] font-bold transition-all duration-500 bg-white ${isCurrent && is_at_station
+                                        ? "border-amber-500 text-amber-600 scale-110 shadow-md ring-4 ring-amber-100"
+                                        : isCurrent && !is_at_station
+                                            ? "border-blue-500 text-blue-600 scale-110 shadow-md ring-4 ring-blue-100"
+                                            : isPassed
+                                                ? "border-blue-500 bg-blue-50 text-blue-600"
+                                                : "border-gray-200 text-gray-400"
                                     }`}>
                                     {isCurrent ? (
                                         <FcRating className="text-base animate-pulse" />
                                     ) : (
-                                        <span>{idx + 1}</span>
+                                        <span className={isPassed ? "text-blue-600" : "text-gray-400"}>{idx + 1}</span>
                                     )}
                                 </div>
 
-                                {/* Nhãn tên Ga nằm cố định phía dưới nút */}
                                 <div className="absolute top-10 flex flex-col items-center text-center w-[120px]">
-                                    <span className={`text-[11px] font-semibold tracking-tight line-clamp-2 text-center leading-tight transition-colors duration-300 ${isCurrent && isAtStation
-                                        ? "text-amber-600 font-bold"
-                                        : isCurrent && !isAtStation
-                                            ? "text-blue-600 font-bold"
-                                            : isPassed
-                                                ? "text-gray-700"
-                                                : "text-gray-400"
+                                    <span className={`text-[11px] font-semibold tracking-tight line-clamp-2 text-center leading-tight transition-colors duration-300 ${isCurrent && is_at_station
+                                            ? "text-amber-600 font-bold"
+                                            : isCurrent && !is_at_station
+                                                ? "text-blue-600 font-bold"
+                                                : isPassed
+                                                    ? "text-gray-700"
+                                                    : "text-gray-400"
                                         }`}>
                                         {station.ten_ga}
                                     </span>

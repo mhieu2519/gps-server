@@ -5,6 +5,14 @@ export interface ToaTau {
     kieu: string;      // Víp, Ghế mềm, Than, Dầu...
     tai_trong: number; // Số người hoặc khối lượng
 }
+export interface SocketDataProgress {
+    current_segment: string;
+    next_station_code: string;
+    segment_progress: number;
+    distance_left_meters: number;
+    eta_minutes: number;
+    is_at_station: boolean;
+}
 export interface DeviceStatus {
     lat: number;
     lng: number;
@@ -16,6 +24,7 @@ export interface DeviceStatus {
     danh_sach_toa: ToaTau[];
 
     danh_sach_ga_chi_tiet?: StationDetails[];
+    socketData?: SocketDataProgress; // Thông tin tiến độ bám ray từ socket
 }
 
 export interface HistoryData {

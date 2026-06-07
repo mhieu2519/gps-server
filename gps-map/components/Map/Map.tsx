@@ -140,6 +140,15 @@ export default function MapDashboard() {
                         lng: Number(data.lng),
                         speed: Number(data.speed || 0),
                         heading: Number(data.heading || 0),
+                        // Lấy thông tin tính toán tiến độ bám ray từ socket
+                        socketData: {
+                            current_segment: data.current_segment,
+                            next_station_code: data.next_station_code,
+                            segment_progress: Number(data.segment_progress || 0),
+                            distance_left_meters: Number(data.distance_left_meters || 0),
+                            eta_minutes: Number(data.eta_minutes || 0),
+                            is_at_station: Boolean(data.is_at_station),
+                        }
                     }
                 };
                 // console.log("📊 State [devices] sau khi up từ Socket:", update);
@@ -485,11 +494,10 @@ export default function MapDashboard() {
                                                         ))}
                                                     </div>
 
-                                                    {devices[id].danh_sach_ga_chi_tiet && devices[id].danh_sach_ga_chi_tiet.length > 0 && (
+                                                    {device.danh_sach_ga_chi_tiet && device.danh_sach_ga_chi_tiet.length > 0 && device.socketData && (
                                                         <TrainRouteProgress
-                                                            currentLat={devices[id].lat}
-                                                            currentLng={devices[id].lng}
-                                                            routeStations={devices[id].danh_sach_ga_chi_tiet}
+                                                            routeStations={device.danh_sach_ga_chi_tiet}
+                                                            socketData={device.socketData}
                                                         />
                                                     )}
 

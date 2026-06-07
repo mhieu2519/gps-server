@@ -4,6 +4,8 @@
 //Đồng thời, API này cũng trả về chi tiết danh sách toa tàu và danh sách ga chi tiết đã đối chiếu để Map.tsx nhận diện hiển thị trên bản đồ
 import { NextResponse } from 'next/server';
 import { db } from "@/lib/db";
+import { DeviceStatus } from "@/components/Map/types";
+
 
 export async function GET() {
     try {
@@ -70,7 +72,8 @@ export async function GET() {
 `);
 
         // Chuyển mảng kết quả thành Object Map (Key là ma_tau)
-        const devices = res.rows.reduce((acc: any, row) => {
+        // const devices = res.rows.reduce((acc: any, row) => {
+        const devices = res.rows.reduce<Record<string, DeviceStatus & { signal: number, timestamp: number }>>((acc, row) => {
             acc[row.ma_tau] = {
                 lat: row.lat,
                 lng: row.lng,
@@ -80,7 +83,8 @@ export async function GET() {
                 signal: row.signal,
                 timestamp: Number(row.timestamp), //ép kiểu số do PostgreSQL BIGINT trả về string 
                 danh_sach_toa: row.danh_sach_toa,
-                danh_sach_ga_chi_tiet: row.danh_sach_ga_chi_tiet  // Đẩy mảng ga chi tiết đã đối chiếu ra ngoài cho Frontend Map.tsx nhận diện
+                danh_sach_ga_chi_tiet: row.danh_sach_ga_chi_tiet, // Đẩy mảng ga chi tiết đã đối chiếu ra ngoài cho Frontend Map.tsx nhận diện
+                socketData: undefined
             };
             return acc;
         }, {});
