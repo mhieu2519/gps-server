@@ -28,6 +28,8 @@ import { FcHighBattery } from "react-icons/fc";
 import { FcElectricalSensor } from "react-icons/fc";
 import { FcNeutralTrading } from "react-icons/fc";
 import { FcCancel } from "react-icons/fc";
+import { GoAlert } from "react-icons/go";
+import { PiVibrateDuotone } from "react-icons/pi";
 
 // Đăng ký plugin Leaflet
 L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling);
@@ -505,6 +507,7 @@ export default function MapDashboard() {
 
 
                                                     {/* Chi tiết tàu */}
+                                                    {/*lỗi ở đây 11/6/26*/}
                                                     {selectedWagon ? (
                                                         <div className={styles.wagonDetailBox}>
                                                             <b>Toa: {selectedWagon.ma_toa}</b> ({selectedWagon.loai_toa})
@@ -527,6 +530,10 @@ export default function MapDashboard() {
                                                                 {device.lng != null ? device.lng.toFixed(4) : 'N/A'}
                                                             </p>
                                                             <p className="flex items-center "><GiOldWagon className="mr-2" /> Số toa: {devices[id].danh_sach_toa?.length ?? 0} </p>
+                                                            {/* thêm thông tin hiển thị dữ liệu từ cảm biến ( bổ sung)*/}
+                                                            <p className="flex items-center "> <PiVibrateDuotone className="mr-2" /> Rung: {devices[id].vibration ?? 0}  </p>
+                                                            <p className="flex items-center "> <GoAlert className="mr-2" /> Cảnh báo: {devices[id].alert ?? 'Không có'}  </p>
+
                                                         </div>
                                                     )}
                                                 </div>
