@@ -24,6 +24,7 @@ interface Carriage {
     max_capacity: number;
     isActive: boolean;
     loai_toa?: string;
+    kieu_cho?: string;
     ten_hang_hoa?: string;
     current_cargo_weight?: number;
     max_cargo_capacity?: number;
@@ -144,6 +145,8 @@ export default function DispatchAdmin() {
                     id: item.id,
                     carriage_code: item.ma_toa,
                     type: item.loai_toa,
+                    kieu_cho: item.kieu_cho,
+
                     current_passenger_count: item.so_luong_thuc_te || 0,
                     max_capacity: item.suc_chua_toi_da || 0,
                     isActive: item.is_active !== undefined ? item.is_active : true,

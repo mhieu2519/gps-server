@@ -19,6 +19,8 @@ export async function GET() {
         t.heading,
         t.battery,
         t.signal,
+        t.vibration,
+        t.alert,
         t.timestamp,
 
         COALESCE(
@@ -81,6 +83,8 @@ export async function GET() {
                 heading: row.heading,
                 battery: row.battery,
                 signal: row.signal,
+                vibration: row.vibration,
+                alert: row.alert,
                 timestamp: Number(row.timestamp), //ép kiểu số do PostgreSQL BIGINT trả về string 
                 danh_sach_toa: row.danh_sach_toa,
                 danh_sach_ga_chi_tiet: row.danh_sach_ga_chi_tiet, // Đẩy mảng ga chi tiết đã đối chiếu ra ngoài cho Frontend Map.tsx nhận diện
