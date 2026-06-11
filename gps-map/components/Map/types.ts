@@ -22,8 +22,8 @@ export interface DeviceStatus {
     signal: number;
     timestamp: number;
     danh_sach_toa: ToaTau[];
-    vibration?: number; // Dữ liệu rung từ cảm biến
-    alert?: string; // Thông báo cảnh báo nếu có
+    vibration: number; // Dữ liệu rung từ cảm biến
+    alert: string; // Thông báo cảnh báo nếu có
     danh_sach_ga_chi_tiet?: StationDetails[];
     socketData?: SocketDataProgress; // Thông tin tiến độ bám ray từ socket
 }

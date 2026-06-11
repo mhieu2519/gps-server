@@ -202,7 +202,9 @@ redis.on('message', async (channel, message) => {
                     distance_left_meters: Math.max(0, distanceLeftMeters),
                     eta_minutes: etaMinutes,
                     is_at_station: speed < 3 && distanceLeftMeters < 150 // Logic bổ trợ nhận diện tàu đỗ ga xép
-                }
+                },
+                vibration: vibration,
+                alert: alert
             };
 
             // Bắn gói tin đã được xử lý hình học mượt mà về Front-end map
