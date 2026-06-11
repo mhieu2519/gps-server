@@ -83,6 +83,8 @@ redis.on('message', async (channel, message) => {
         const lng = parseFloat(data.longitude || data.lng);
         const speed = parseFloat(data.velocity || data.speed || 0); // km/h
         const heading = parseFloat(data.heading || 0); // Hướng góc mũi tàu từ 0 đến 360 độ
+        const vibration = parseFloat(data.vibration || 0); // Thông số rung động (nếu có)
+        const alert = data.alert || null; // Thông báo cảnh báo (nếu có)
 
         if (isNaN(lat) || isNaN(lng)) return;
 
