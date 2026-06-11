@@ -152,7 +152,11 @@ export default function MapDashboard() {
                             distance_left_meters: Number(sd.distance_left_meters || 0),
                             eta_minutes: Number(sd.eta_minutes || 0),
                             is_at_station: Boolean(sd.is_at_station),
-                        } : existing.socketData
+                        } : existing.socketData,
+                        // cạp nhât vibration và alert từ socket
+                        vibration: Number(data.vibration ?? existing.vibration ?? 0),
+                        alert: data.alert ?? existing.alert ?? null
+
                     }
                 };
                 console.log("📊 State [devices] sau khi up từ Socket:", update);
