@@ -70,56 +70,16 @@ Dự án được xây dựng nhằm phục vụ nghiên cứu và ứng dụng 
 
 ## 🏗️ Kiến trúc hệ thống
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Thiết bị GPS (Tàu)                      │
-│                    (Gửi MQTT → EMQX)                        │
-└─────────────────────────┬───────────────────────────────────┘
-                          │ MQTT (port 1883)
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    EMQX Broker                               │
-│           (Rule Engine → Save to PostgreSQL)                 │
-│           (Rule Engine → Publish to Redis Pub/Sub)           │
-└──────────────┬──────────────────────┬───────────────────────┘
-               │                      │
-               ▼                      ▼
-┌──────────────────────┐   ┌──────────────────────────────────┐
-│   PostgreSQL/PostGIS │   │         Redis Cache               │
-│  (Lưu tọa độ, lịch  │   │   (Pub/Sub kênh train_locations) │
-│   sử, cấu hình)     │   └──────────────┬───────────────────┘
-└──────────────────────┘                  │
-                                          ▼
-                          ┌──────────────────────────────────┐
-                          │       Socket Server (Node.js)     │
-                          │  - Subscribe Redis channel        │
-                          │  - PostGIS snap-to-rail query     │
-                          │  - Emit train_update → clients    │
-                          └──────────────┬───────────────────┘
-                                         │ WebSocket (port 4000)
-                                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  Next.js Web App (port 3000)                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────┐ │
-│  │  Map.tsx    │  │  Dispatch   │  │  Station Update      │ │
-│  │  (Leaflet)  │  │  Admin      │  │  (Supervisor)        │ │
-│  └─────────────┘  └─────────────┘  └──────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-              ┌────────────────────────┐
-              │  GeoServer (port 8080) │
-              │  (WMS: ga, đường ray)  │
-              └────────────────────────┘
-                          │
-              ┌────────────────────────┐
-              │  Cloudflare Tunnel     │
-              │  (HTTPS ra Internet)   │
-              └────────────────────────┘
-```
 
----
+<img src="images/so_do_tong_quan.png" alt="Tổng quan">
 
+
+
+
+
+
+```
+```
 ## 🛠️ Công nghệ sử dụng
 
 | Thành phần | Công nghệ | Phiên bản |
