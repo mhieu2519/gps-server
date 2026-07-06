@@ -1,3 +1,4 @@
+// gps-server/gps-map/components/Map/SmoothTrainMarker.tsx
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -33,7 +34,7 @@ export default function SmoothTrainMarker({ targetPosition, heading, duration = 
   const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // 1. Chốt điểm xuất phát CHÍNH XÁC là vị trí thực tế hiện tại của tàu 
+    // Chốt điểm xuất phát CHÍNH XÁC là vị trí thực tế hiện tại của tàu 
     const startLat = currentPosRef.current[0];
     const startLng = currentPosRef.current[1];
     const startHeading = currentHeadingRef.current;
@@ -48,21 +49,21 @@ export default function SmoothTrainMarker({ targetPosition, heading, duration = 
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // 2. Áp dụng Easing thay vì Linear thường
+      // Áp dụng Easing thay vì Linear thường
       const easedProgress = easeOutQuad(progress);
 
       // Tính toán vị trí nội suy mới
       const currentLat = startLat + (targetLat - startLat) * easedProgress;
       const currentLng = startLng + (targetLng - startLng) * easedProgress;
 
-      // 3. Nội suy góc xoay 
+      //  Nội suy góc xoay 
       const currentHeading = interpolateAngle(startHeading, targetHeading, easedProgress);
 
       // Lưu lại để nếu có dữ liệu mới gối đầu, ta có ngay điểm xuất phát chuẩn
       currentPosRef.current = [currentLat, currentLng];
       currentHeadingRef.current = currentHeading;
 
-      // 4. Can thiệp trực tiếp vào DOM Leaflet, KHÔNG RE-RENDER REACT
+      // Can thiệp trực tiếp vào DOM Leaflet, KHÔNG RE-RENDER REACT
       if (markerRef.current) {
         markerRef.current.setLatLng([currentLat, currentLng]);
         if ((markerRef.current as any).setRotationAngle) {

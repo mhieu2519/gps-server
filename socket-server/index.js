@@ -72,7 +72,7 @@ redis.on('message', async (channel, message) => {
     try {
         const data = JSON.parse(message);
 
-        // ✅ Chỉ emit nếu tàu đang có chuyến dang_chay
+        //  Chỉ emit nếu tàu đang có chuyến dang_chay
         if (!activeTrainSet.has(data.ma_tau)) {
             console.log(`⛔ Bỏ qua tàu chưa lập: ${data.ma_tau}`);
             return;

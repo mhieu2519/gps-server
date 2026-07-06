@@ -1,4 +1,4 @@
-// File: gps-server/gps-map/app/api/dispatch/save-layout/route.ts
+// /app/api/dispatch/save-layout/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-guard";
@@ -59,31 +59,45 @@ export async function POST(request: Request) {
             if (!ma_toa) continue;
 
             const is_active = carriage.is_active ?? carriage.isActive ?? true;
-            const so_luong_thuc_te = carriage.tai_trong || carriage.khoi_luong_thuc_te || carriage.so_luong_thuc_te || 0;
-
+            // fix lỗi mất dữ liệu số lượng thực tế: ưu tiên lấy từ các trường khác nhau nếu có, mặc định 0
+            // const so_luong_thuc_te = carriage.tai_trong || carriage.khoi_luong_thuc_te || carriage.so_luong_thuc_te || 0;
+            const isCargo = carriage.loai_toa === "HANG_HOA" || carriage.type === "HANG_HOA" || !!carriage.ten_hang_hoa;
+            const so_luong_thuc_te =
+                carriage.current_cargo_weight ??
+                carriage.current_passenger_count ??
+                carriage.so_luong_thuc_te ??
+                carriage.tai_trong ??
+                carriage.khoi_luong_thuc_te ??
+                0;
+            // Đơn vị: toa hàng lấy từ dữ liệu tàu hàng sẵn có, toa khách mặc định "người"
+            const don_vi = isCargo ? (carriage.don_vi || "tấn") : "người";
             // 4.1: Đồng bộ (Upsert) danh mục cấu trúc cứng vào bảng public.toa
             await client.query(`
-                INSERT INTO public.toa (ma_toa, loai_toa, kieu_cho,suc_chua_toi_da, tai_trong)
-                VALUES ($1, $2, $3, $4, $5)
+                INSERT INTO public.toa (ma_toa, loai_toa, kieu_cho,suc_chua_toi_da, tai_trong, don_vi)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (ma_toa) 
                 DO UPDATE SET 
                     loai_toa = EXCLUDED.loai_toa, 
                     suc_chua_toi_da = EXCLUDED.suc_chua_toi_da,
-                    tai_trong = EXCLUDED.tai_trong
+                    tai_trong = EXCLUDED.tai_trong,
+                    don_vi = EXCLUDED.don_vi
             `, [
                 ma_toa,
                 carriage.loai_toa || carriage.type,
                 carriage.kieu_cho || null,
-                carriage.max_capacity || carriage.suc_chua_toi_da || null,
-                so_luong_thuc_te]);
+                // carriage.max_capacity || carriage.suc_chua_toi_da || null,
+                carriage.max_cargo_capacity || carriage.max_capacity || carriage.suc_chua_toi_da || null,
+                so_luong_thuc_te,
+                don_vi
+            ]);
 
             // 4.2: Gom mảng để chuẩn bị Bulk Insert vào cấu trúc lập tàu
             const n = insertValues.length;
-            insertRows.push(`($${n + 1}, $${n + 2}, $${n + 3}, $${n + 4}, $${n + 5})`);
-            insertValues.push(selectedTrip, ma_toa, thu_tu_toa, is_active, so_luong_thuc_te);
+            insertRows.push(`($${n + 1}, $${n + 2}, $${n + 3}, $${n + 4}, $${n + 5}, $${n + 6})`);
+            insertValues.push(selectedTrip, ma_toa, thu_tu_toa, is_active, so_luong_thuc_te, don_vi);
 
             // 4.3: Phân loại danh sách mã toa để đánh dấu hoàn tất xử lý (Processed) ở các bảng nguồn thô
-            if (carriage.loai_toa === "HANG_HOA" || carriage.type === "HANG_HOA" || carriage.ten_hang_hoa) {
+            if (isCargo) {
                 processedCargoCodes.push(ma_toa);
             } else {
                 processedTicketCodes.push(ma_toa);

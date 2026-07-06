@@ -35,7 +35,7 @@ export default function TrainRouteProgress({ routeStations, socketData }: TrainP
     const totalStations = routeStations.length;
     const { next_station_code, segment_progress, eta_minutes, is_at_station, distance_left_meters } = socketData;
 
-    // 1. Xác định vị trí Index của ga tiếp theo trong mảng hành trình cụ thể của chuyến đi
+    // Xác định vị trí Index của ga tiếp theo trong mảng hành trình cụ thể của chuyến đi
     let nextStationIdx = routeStations.findIndex(st => st.ma_ga.trim() === next_station_code.trim());
 
     // Nếu không tìm thấy, thử tìm theo cặp mã trong current_segment (Ví dụ: "HN-LB")
@@ -48,7 +48,7 @@ export default function TrainRouteProgress({ routeStations, socketData }: TrainP
     // Nếu nextStationIdx là ga đầu tiên (0), ga trước đó cũng là 0. Ngược lại là nextStationIdx - 1.
     const lastStationIdx = nextStationIdx > 0 ? nextStationIdx - 1 : 0;
 
-    // 2. Tính toán phần trăm tiến độ tổng thể trên toàn tuyến
+    // Tính toán phần trăm tiến độ tổng thể trên toàn tuyến
     let progressPercent = 0;
     if (is_at_station) {
         progressPercent = totalStations > 1 ? (nextStationIdx / (totalStations - 1)) * 100 : 100;

@@ -91,6 +91,7 @@ services:
       - ./redis_data:/data
     networks:
       - gps_network
+# 7. Socket-server 
   socket-service:
     build: ./socket-server
     container_name: socket-service

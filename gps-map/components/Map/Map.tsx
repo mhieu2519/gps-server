@@ -430,7 +430,7 @@ export default function MapDashboard() {
                                             smoothFactor={1}
                                             pathOptions={{ color: "#ffae00", weight: 5, dashArray: '10, 10' }}
                                         />
-                                        {/* 2. Điểm bắt đầu (Màu xanh) */}
+                                        {/* Điểm bắt đầu (Màu xanh) */}
                                         <Marker
                                             position={activeSessionPath[0]}
                                             icon={startIcon}
@@ -438,7 +438,7 @@ export default function MapDashboard() {
                                             <Popup><b>Điểm bắt đầu</b><br />Hành trình của tàu</Popup>
                                         </Marker>
 
-                                        {/* 3. Điểm kết thúc (Màu đỏ) */}
+                                        {/* Điểm kết thúc (Màu đỏ) */}
                                         <Marker
                                             position={activeSessionPath[activeSessionPath.length - 1]}
                                             icon={endIcon}
@@ -526,8 +526,7 @@ export default function MapDashboard() {
                                                     ) : (
                                                         <div className={styles.generalInfo}>
                                                             <p className="flex items-center "><IoSpeedometerOutline className="mr-2" /> Tốc độ: {devices[id].speed ?? 0} km/h</p>
-                                                            {/*lỗi */}
-                                                            {/*  <p className="flex items-center "><IoLocationOutline className="mr-2" /> {devices[id].lat.toFixed(4)}, {devices[id].lng.toFixed(4)}</p> */}
+
                                                             <p className="flex items-center">
                                                                 <IoLocationOutline className="mr-2" />
                                                                 {device.lat != null ? device.lat.toFixed(4) : 'N/A'},&nbsp;
