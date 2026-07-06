@@ -93,8 +93,8 @@ export async function POST(request: Request) {
 
             // 4.2: Gom mảng để chuẩn bị Bulk Insert vào cấu trúc lập tàu
             const n = insertValues.length;
-            insertRows.push(`($${n + 1}, $${n + 2}, $${n + 3}, $${n + 4}, $${n + 5}, $${n + 6})`);
-            insertValues.push(selectedTrip, ma_toa, thu_tu_toa, is_active, so_luong_thuc_te, don_vi);
+            insertRows.push(`($${n + 1}, $${n + 2}, $${n + 3}, $${n + 4}, $${n + 5})`);
+            insertValues.push(selectedTrip, ma_toa, thu_tu_toa, is_active, so_luong_thuc_te);
 
             // 4.3: Phân loại danh sách mã toa để đánh dấu hoàn tất xử lý (Processed) ở các bảng nguồn thô
             if (isCargo) {
