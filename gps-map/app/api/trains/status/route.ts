@@ -29,7 +29,12 @@ export async function GET() {
                     json_build_object(
                         'ma_toa', ctlt.ma_toa,
                         'thu_tu_toa', ctlt.thu_tu_toa,
-                        'so_luong_thuc_te', ctlt.so_luong_thuc_te
+                        'so_luong_thuc_te', ctlt.so_luong_thuc_te,
+                        'loai_toa', pt.loai_toa,
+                        'kieu_cho', pt.kieu_cho,
+                        'suc_chua_toi_da', pt.suc_chua_toi_da,
+                        'tai_trong', ctlt.so_luong_thuc_te,
+                        'don_vi', pt.don_vi
                     )
                     ORDER BY ctlt.thu_tu_toa
                 )

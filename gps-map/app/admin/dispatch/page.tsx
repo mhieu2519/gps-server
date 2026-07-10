@@ -192,22 +192,40 @@ export default function DispatchAdmin() {
             prev.map(c => (c.id === id ? { ...c, isActive: !c.isActive } : c))
         );
     };
+    /*
+        // Móc thêm toa hàng thực tế vào đuôi đoàn tàu
+        const handleAddCargoCarriage = (carriage: Carriage) => {
+            setTrainLayout([...trainLayout, carriage]);
+            setAvailableCargoCarriages(availableCargoCarriages.filter(c => c.id !== carriage.id));
+        };
+    
+        // Gỡ bỏ toa hàng khỏi đoàn tàu trả lại kho
+        const handleRemoveCargoCarriage = (id: number) => {
+            const carriage = trainLayout.find(c => c.id === id);
+            if (carriage) {
+                setAvailableCargoCarriages([...availableCargoCarriages, carriage]);
+                setTrainLayout(trainLayout.filter(c => c.id !== id));
+            }
+        };
+    */
 
-    // Móc thêm toa hàng thực tế vào đuôi đoàn tàu
     const handleAddCargoCarriage = (carriage: Carriage) => {
-        setTrainLayout([...trainLayout, carriage]);
-        setAvailableCargoCarriages(availableCargoCarriages.filter(c => c.id !== carriage.id));
+        setTrainLayout(prev => {
+            if (prev.some(c => c.carriage_code === carriage.carriage_code)) return prev; // chặn trùng
+            return [...prev, carriage];
+        });
+        setAvailableCargoCarriages(prev => prev.filter(c => c.id !== carriage.id));
     };
 
-    // Gỡ bỏ toa hàng khỏi đoàn tàu trả lại kho
     const handleRemoveCargoCarriage = (id: number) => {
-        const carriage = trainLayout.find(c => c.id === id);
-        if (carriage) {
-            setAvailableCargoCarriages([...availableCargoCarriages, carriage]);
-            setTrainLayout(trainLayout.filter(c => c.id !== id));
-        }
+        setTrainLayout(prev => {
+            const carriage = prev.find(c => c.id === id);
+            if (carriage) {
+                setAvailableCargoCarriages(av => [...av, carriage]);
+            }
+            return prev.filter(c => c.id !== id);
+        });
     };
-
     // Lưu cấu hình lập đoàn tàu và cập nhật trạng thái
     const handleSaveLayout = async () => {
         if (!trainHead || !selectedRoute) {

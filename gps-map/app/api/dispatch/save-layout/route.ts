@@ -50,11 +50,14 @@ export async function POST(request: Request) {
         const insertRows: string[] = [];
         const processedCargoCodes: string[] = [];
         const processedTicketCodes: string[] = [];
+        const seen = new Set<string>();
 
         for (let i = 0; i < layout.length; i++) {
             const carriage = layout[i];
             const thu_tu_toa = i + 1;
             const ma_toa = carriage.ma_toa || carriage.carriage_code;
+            if (!ma_toa || seen.has(ma_toa)) continue; // bỏ qua nếu trùng
+            seen.add(ma_toa);
 
             if (!ma_toa) continue;
 
