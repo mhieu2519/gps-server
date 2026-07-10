@@ -41,6 +41,8 @@ export async function GET() {
                 FROM chuyen_di cd
                 JOIN chi_tiet_lap_tau ctlt
                     ON ctlt.ma_chuyen_di = cd.ma_chuyen_di
+                LEFT JOIN public.toa pt
+                    ON pt.ma_toa = ctlt.ma_toa
                 WHERE cd.ma_tau_chay = t.ma_tau
                 AND cd.trang_thai = 'dang_chay'
             ),
